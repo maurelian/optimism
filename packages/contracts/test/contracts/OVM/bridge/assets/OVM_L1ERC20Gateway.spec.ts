@@ -184,7 +184,7 @@ describe('OVM_L1ERC20Gateway', () => {
 
     it('deposit() escrows the deposit amount and sends the correct deposit message', async () => {
       // alice calls deposit on the gateway and the L1 gateway calls transferFrom on the token
-      await OVM_L1ERC20Gateway.deposit(depositAmount, NON_NULL_BYTES32)
+      await OVM_L1ERC20Gateway.deposit(depositAmount, NON_NULL_BYTES32, 0)
       const depositCallToMessenger =
         Mock__OVM_L1CrossDomainMessenger.smocked.sendMessage.calls[0]
 
@@ -220,7 +220,8 @@ describe('OVM_L1ERC20Gateway', () => {
       await OVM_L1ERC20Gateway.depositTo(
         bobsAddress,
         depositAmount,
-        NON_NULL_BYTES32
+        NON_NULL_BYTES32,
+        0
       )
       const depositCallToMessenger =
         Mock__OVM_L1CrossDomainMessenger.smocked.sendMessage.calls[0]

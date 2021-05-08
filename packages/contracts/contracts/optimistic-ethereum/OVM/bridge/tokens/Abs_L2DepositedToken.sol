@@ -139,11 +139,14 @@ abstract contract Abs_L2DepositedToken is iOVM_L2DepositedToken, OVM_CrossDomain
 
     /**
      * @dev initiate a withdraw of some tokens to the caller's account on L1
-     * @param _amount Amount of the token to withdraw
+     * @param _amount Amount of the token to withdraw.
+     * @param _data Data to forward to L1.
+     * @param _l1Gas Gas limit for the provided message.
      */
     function withdraw(
         uint _amount,
-        bytes calldata _data
+        bytes calldata _data,
+        uint32 _l1Gas
     )
         external
         override
@@ -154,19 +157,23 @@ abstract contract Abs_L2DepositedToken is iOVM_L2DepositedToken, OVM_CrossDomain
             msg.sender,
             msg.sender,
             _amount,
-            _data
+            _data,
+            _l1Gas
         );
     }
 
     /**
-     * @dev initiate a withdraw of some token to a recipient's account on L1
-     * @param _to L1 adress to credit the withdrawal to
-     * @param _amount Amount of the token to withdraw
+     * @dev initiate a withdraw of some token to a recipient's account on L1.
+     * @param _to L1 adress to credit the withdrawal to.
+     * @param _amount Amount of the token to withdraw.
+     * @param _data Data to forward to L1.
+     * @param _l1Gas Gas limit for the provided message.
      */
     function withdrawTo(
         address _to,
         uint _amount,
-        bytes calldata _data
+        bytes calldata _data,
+        uint32 _l1Gas
     )
         external
         override
@@ -177,22 +184,26 @@ abstract contract Abs_L2DepositedToken is iOVM_L2DepositedToken, OVM_CrossDomain
             msg.sender,
             _to,
             _amount,
-            _data);
+            _data,
+            _l1Gas
+        );
     }
 
     /**
      * @dev Performs the logic for deposits by storing the token and informing the L2 token Gateway of the deposit.
      *
-     * @param _to Account to give the withdrawal to on L1
-     * @param _to Account to give the withdrawal to on L1
-     * @param _amount Amount of the token to withdraw
-     * @param _amount Amount of the token to withdraw
+     * @param _from Account to pull the deposit from on L2.
+     * @param _to Account to give the withdrawal to on L1.
+     * @param _amount Amount of the token to withdraw.
+     * @param _data Data to forward to L1.
+     * @param _l1Gas Gas limit for the provided message on L1.
      */
     function _initiateWithdrawal(
         address _from,
         address _to,
         uint _amount,
-        bytes calldata _data
+        bytes calldata _data,
+        uint32 _l1Gas
     )
         internal
     {
@@ -208,11 +219,12 @@ abstract contract Abs_L2DepositedToken is iOVM_L2DepositedToken, OVM_CrossDomain
             _data
         );
 
+        uint32 l1Gas = _l1Gas > 0 ? _l1Gas : getFinalizeWithdrawalL1Gas();
         // Send message up to L1 gateway
         sendCrossDomainMessage(
             address(l1TokenGateway),
             message,
-            getFinalizeWithdrawalL1Gas()
+            l1Gas
         );
 
         emit WithdrawalInitiated(msg.sender, _to, _amount, _data);
@@ -227,6 +239,7 @@ abstract contract Abs_L2DepositedToken is iOVM_L2DepositedToken, OVM_CrossDomain
      * L2 token.
      * This call will fail if it did not originate from a corresponding deposit in OVM_l1TokenGateway.
      *
+     * @param _from Account to pull the deposit from on L2.
      * @param _to Address to receive the withdrawal at
      * @param _amount Amount of the token to withdraw
      * @param _data Data provided by the sender on L1.
