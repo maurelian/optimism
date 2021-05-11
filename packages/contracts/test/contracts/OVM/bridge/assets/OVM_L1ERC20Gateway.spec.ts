@@ -214,6 +214,19 @@ describe('OVM_L1ERC20Gateway', () => {
       expect(depositCallToMessenger._gasLimit).to.equal(finalizeDepositGasLimit)
     })
 
+    it('deposit() uses the user provided gas limit if it is larger than the default value', async () => {
+      const customGasLimit = 10_000_000
+      await OVM_L1ERC20Gateway.deposit(
+        depositAmount,
+        NON_NULL_BYTES32,
+        customGasLimit
+      )
+
+      const depositCallToMessenger =
+        Mock__OVM_L1CrossDomainMessenger.smocked.sendMessage.calls[0]
+      expect(depositCallToMessenger._gasLimit).to.equal(customGasLimit)
+    })
+
     it('depositTo() escrows the deposit amount and sends the correct deposit message', async () => {
       // depositor calls deposit on the gateway and the L1 gateway calls transferFrom on the token
       const bobsAddress = await bob.getAddress()
@@ -250,6 +263,21 @@ describe('OVM_L1ERC20Gateway', () => {
         )
       )
       expect(depositCallToMessenger._gasLimit).to.equal(finalizeDepositGasLimit)
+    })
+
+    it('depositTo() uses the user provided gas limit if it is larger than the default value', async () => {
+      const bobsAddress = await bob.getAddress()
+      const customGasLimit = 10_000_000
+      await OVM_L1ERC20Gateway.depositTo(
+        bobsAddress,
+        depositAmount,
+        NON_NULL_BYTES32,
+        customGasLimit
+      )
+
+      const depositCallToMessenger =
+        Mock__OVM_L1CrossDomainMessenger.smocked.sendMessage.calls[0]
+      expect(depositCallToMessenger._gasLimit).to.equal(customGasLimit)
     })
   })
 })

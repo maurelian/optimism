@@ -57,4 +57,13 @@ interface iOVM_L2DepositedToken {
         bytes calldata _data
     )
         external;
+
+    function getFinalizeWithdrawalL1Gas()
+        external
+        pure
+        virtual
+        returns(
+            uint32
+        );
+
 }

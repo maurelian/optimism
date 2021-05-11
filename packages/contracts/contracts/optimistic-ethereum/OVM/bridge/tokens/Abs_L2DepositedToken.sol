@@ -81,7 +81,7 @@ abstract contract Abs_L2DepositedToken is iOVM_L2DepositedToken, OVM_CrossDomain
      ********************************/
 
     // Default gas value which can be overridden if more complex logic runs on L1.
-    uint32 internal constant DEFAULT_FINALIZE_WITHDRAWAL_L1_GAS = 100000;
+    uint32 internal constant DEFAULT_FINALIZE_WITHDRAWAL_L1_GAS = 100_000;
 
     /**
      * @dev Core logic to be performed when a withdrawal from L2 is initialized.
@@ -124,6 +124,7 @@ abstract contract Abs_L2DepositedToken is iOVM_L2DepositedToken, OVM_CrossDomain
     function getFinalizeWithdrawalL1Gas()
         public
         pure
+        override
         virtual
         returns(
             uint32
@@ -219,7 +220,10 @@ abstract contract Abs_L2DepositedToken is iOVM_L2DepositedToken, OVM_CrossDomain
             _data
         );
 
-        uint32 l1Gas = _l1Gas > 0 ? _l1Gas : getFinalizeWithdrawalL1Gas();
+        // Prevent tokens stranded on other side by taking
+        // the max of the user provided gas and DEFAULT_FINALIZE_WITHDRAWAL_L1_GAS
+        uint32 defaultGas = getFinalizeWithdrawalL1Gas();
+        uint32 l1Gas = _l1Gas > defaultGas ? _l1Gas : defaultGas;
         // Send message up to L1 gateway
         sendCrossDomainMessage(
             address(l1TokenGateway),

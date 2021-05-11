@@ -53,7 +53,7 @@ abstract contract Abs_L1TokenGateway is iOVM_L1TokenGateway, OVM_CrossDomainEnab
      ********************************/
 
     // Default gas value which can be overridden if more complex logic runs on L2.
-    uint32 internal constant DEFAULT_FINALIZE_DEPOSIT_L2_GAS = 1200000;
+    uint32 internal constant DEFAULT_FINALIZE_DEPOSIT_L2_GAS = 1_200_000;
 
     /**
      * @dev Core logic to be performed when a withdrawal is finalized on L1.
@@ -94,11 +94,11 @@ abstract contract Abs_L1TokenGateway is iOVM_L1TokenGateway, OVM_CrossDomainEnab
     /**
      * @dev Overridable getter for the L2 gas limit, in the case it may be
      * dynamic, and the above public constant does not suffice.
-     *
      */
     function getFinalizeDepositL2Gas()
         public
         pure
+        override
         virtual
         returns(
             uint32
@@ -183,7 +183,11 @@ abstract contract Abs_L1TokenGateway is iOVM_L1TokenGateway, OVM_CrossDomainEnab
             _amount,
             _data
         );
-        uint32 l2Gas = _l2Gas > 0 ? _l2Gas : getFinalizeDepositL2Gas();
+
+        // Prevent tokens stranded on other side by taking
+        // the max of the user provided gas and DEFAULT_FINALIZE_WITHDRAWAL_L1_GAS
+        uint32 defaultGas = getFinalizeDepositL2Gas();
+        uint32 l2Gas = _l2Gas > defaultGas ? _l2Gas : defaultGas;
 
         // Send calldata into L2
         sendCrossDomainMessage(
@@ -205,8 +209,8 @@ abstract contract Abs_L1TokenGateway is iOVM_L1TokenGateway, OVM_CrossDomainEnab
      * L1 ERC20 token.
      * This call will fail if the initialized withdrawal from L2 has not been finalized.
      *
-     * @param _from L2 address initiating the transfer
-     * @param _to L1 address to credit the withdrawal to
+     * @param _from L2 address initiating the transfer.
+     * @param _to L1 address to credit the withdrawal to.
      * @param _amount Amount of the ERC20 to deposit.
      * @param _data Data provided by the sender on L2.
      */
@@ -221,7 +225,6 @@ abstract contract Abs_L1TokenGateway is iOVM_L1TokenGateway, OVM_CrossDomainEnab
         virtual
         onlyFromCrossDomainAccount(l2DepositedToken)
     {
-        // todo: add verification check on _from and _data
         // Call our withdrawal accounting handler implemented by child contracts.
         _handleFinalizeWithdrawal(
             _to,

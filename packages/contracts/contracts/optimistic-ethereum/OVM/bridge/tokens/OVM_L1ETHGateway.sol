@@ -21,11 +21,11 @@ import { Lib_AddressManager } from "../../../libraries/resolver/Lib_AddressManag
  */
 contract OVM_L1ETHGateway is iOVM_L1ETHGateway, OVM_CrossDomainEnabled, Lib_AddressResolver {
 
-    /********************
-     * Public Constants *
-     ********************/
+    /*************
+     * Constants *
+     ************/
 
-    uint32 public constant override getFinalizeDepositL2Gas = 1_200_000;
+    uint32 constant ETH_FINALIZE_L2_GAS = 1_200_000;
 
     /********************************
      * External Contract References *
@@ -91,7 +91,12 @@ contract OVM_L1ETHGateway is iOVM_L1ETHGateway, OVM_CrossDomainEnabled, Lib_Addr
         override
         payable
     {
-        _initiateDeposit(msg.sender, msg.sender, _data, _l2Gas);
+        _initiateDeposit(
+            msg.sender,
+            msg.sender,
+            _data,
+            _l2Gas
+        );
     }
 
     /**
@@ -142,7 +147,11 @@ contract OVM_L1ETHGateway is iOVM_L1ETHGateway, OVM_CrossDomainEnabled, Lib_Addr
                 msg.value,
                 _data
             );
-        uint32 l2Gas = _l2Gas > 0 ? _l2Gas : getFinalizeDepositL2Gas;
+
+        // Prevent tokens stranded on other side by taking
+        // the max of the user provided gas and DEFAULT_FINALIZE_WITHDRAWAL_L1_GAS
+        uint32 defaultGas = getFinalizeDepositL2Gas();
+        uint32 l2Gas = _l2Gas > defaultGas ? _l2Gas : defaultGas;
 
         // Send calldata into L2
         sendCrossDomainMessage(
@@ -163,8 +172,10 @@ contract OVM_L1ETHGateway is iOVM_L1ETHGateway, OVM_CrossDomainEnabled, Lib_Addr
      * L1 ETH token.
      * Since only the xDomainMessenger can call this function, it will never be called before the withdrawal is finalized.
      *
-     * @param _to L1 address to credit the withdrawal to
-     * @param _amount Amount of the ETH to withdraw
+     * @param _from L2 address initiating the transfer.
+     * @param _to L1 address to credit the withdrawal to.
+     * @param _amount Amount of the ERC20 to deposit.
+     * @param _data Data provided by the sender on L2.
      */
     function finalizeWithdrawal(
         address _from,
@@ -179,6 +190,20 @@ contract OVM_L1ETHGateway is iOVM_L1ETHGateway, OVM_CrossDomainEnabled, Lib_Addr
         _safeTransferETH(_to, _amount);
 
         emit WithdrawalFinalized(_from, _to, _amount, _data);
+    }
+
+    /**
+     * @dev Getter for the L2 gas limit.
+     */
+    function getFinalizeDepositL2Gas()
+        public
+        pure
+        override
+        returns(
+            uint32
+        )
+    {
+        return ETH_FINALIZE_L2_GAS;
     }
 
     /**********************************
