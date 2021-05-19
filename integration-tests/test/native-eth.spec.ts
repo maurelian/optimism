@@ -125,7 +125,6 @@ describe('Native ETH Integration Tests', async () => {
     )
   })
 
-
   it('withdraw', async () => {
     const withdrawAmount = BigNumber.from(3)
     const preBalances = await getBalances(env)
