@@ -102,7 +102,7 @@ describe('Native ETH Integration Tests', async () => {
     )
   })
 
-  it('deposit with very large data argument', async () => {
+  it('deposit with a large data argument', async () => {
     const depositAmount = 10
     const preBalances = await getBalances(env)
     const data = `0x` + 'ab'.repeat(4500)
