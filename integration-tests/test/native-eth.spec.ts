@@ -105,9 +105,9 @@ describe('Native ETH Integration Tests', async () => {
   it('deposit with a large data argument', async () => {
     const depositAmount = 10
     const preBalances = await getBalances(env)
-    const data = `0x` + 'ab'.repeat(4500)
+    const data = `0x` + 'ab'.repeat(32000)
     const { tx, receipt } = await env.waitForXDomainTransaction(
-      env.gateway.deposit(data, 0, { value: depositAmount }),
+      env.gateway.deposit(data, 9_000_000, { value: depositAmount }),
       Direction.L1ToL2
     )
 
