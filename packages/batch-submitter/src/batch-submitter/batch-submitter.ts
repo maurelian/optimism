@@ -193,7 +193,7 @@ export abstract class BatchSubmitter {
       minGasPrice: ynatm.toGwei(minGasPriceInGwei),
       maxGasPrice: ynatm.toGwei(maxGasPriceInGwei),
       gasPriceScalingFunction: ynatm.LINEAR(gasRetryIncrement),
-      delay: resubmissionTimeout,
+      delay: 1000,
     })
 
     logger.debug('Resubmission tx receipt', { receipt })
