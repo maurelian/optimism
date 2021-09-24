@@ -432,9 +432,6 @@ contract CanonicalTransactionChain is ICanonicalTransactionChain, Lib_AddressRes
         IChainStorageContainer queueRef = queue();
         uint40 queueLength = _getQueueLength(queueRef);
 
-        // Each leaf index corresponds to a tx, either sequenced or enqueued.
-        uint32 leafIndex = 0;
-
         // Counter for number of sequencer transactions appended so far.
         uint32 numSequencerTransactions = 0;
 
@@ -454,6 +451,10 @@ contract CanonicalTransactionChain is ICanonicalTransactionChain, Lib_AddressRes
 
             // Now process any subsequent queue transactions.
             nextQueueIndex += uint40(curContext.numSubsequentQueueTransactions);
+            require(
+                nextQueueIndex <= queueLength,
+                "Attempted to append more elements than are available in the queue."
+            );
         }
 
         // Generate the required metadata that we need to append this batch
