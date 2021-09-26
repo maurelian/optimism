@@ -346,7 +346,6 @@ contract CanonicalTransactionChain is ICanonicalTransactionChain, Lib_AddressRes
         // TEMPORARY: Disable `appendQueueBatch` for minnet
         revert("appendQueueBatch is currently disabled.");
 
-        // solhint-disable max-line-length
         // _numQueuedTransactions = Math.min(_numQueuedTransactions, getNumPendingQueueElements());
         // require(
         //     _numQueuedTransactions > 0,
@@ -383,7 +382,6 @@ contract CanonicalTransactionChain is ICanonicalTransactionChain, Lib_AddressRes
         //     _numQueuedTransactions,
         //     getTotalElements()
         // );
-        // solhint-enable max-line-length
     }
 
     /**
@@ -635,7 +633,6 @@ contract CanonicalTransactionChain is ICanonicalTransactionChain, Lib_AddressRes
         uint40 lastTimestamp;
         uint40 lastBlockNumber;
 
-        // solhint-disable max-line-length
         assembly {
             extraData       :=  shr(40, extraData)
             totalElements   :=  and(extraData, 0x000000000000000000000000000000000000000000000000000000FFFFFFFFFF)
@@ -643,7 +640,6 @@ contract CanonicalTransactionChain is ICanonicalTransactionChain, Lib_AddressRes
             lastTimestamp   :=  shr(80, and(extraData, 0x0000000000000000000000000000000000FFFFFFFFFF00000000000000000000))
             lastBlockNumber :=  shr(120, and(extraData, 0x000000000000000000000000FFFFFFFFFF000000000000000000000000000000))
         }
-        // solhint-enable max-line-length
 
         return (
             totalElements,
@@ -734,12 +730,10 @@ contract CanonicalTransactionChain is ICanonicalTransactionChain, Lib_AddressRes
 
         uint40 elementTimestamp;
         uint40 elementBlockNumber;
-        // solhint-disable max-line-length
         assembly {
             elementTimestamp   :=         and(timestampAndBlockNumber, 0x000000000000000000000000000000000000000000000000000000FFFFFFFFFF)
             elementBlockNumber := shr(40, and(timestampAndBlockNumber, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000000000))
         }
-        // solhint-enable max-line-length
 
         return Lib_OVMCodec.QueueElement({
             transactionHash: transactionHash,
@@ -806,7 +800,6 @@ contract CanonicalTransactionChain is ICanonicalTransactionChain, Lib_AddressRes
 
             mstore(add(chainElementStart, 1), ctxTimestamp)
             mstore(add(chainElementStart, 33), ctxBlockNumber)
-            // solhint-disable-next-line max-line-length
             calldatacopy(add(chainElementStart, BYTES_TILL_TX_DATA), add(_nextTransactionPtr, 3), _txDataLength)
 
             leafHash := keccak256(chainElementStart, add(BYTES_TILL_TX_DATA, _txDataLength))
@@ -848,7 +841,6 @@ contract CanonicalTransactionChain is ICanonicalTransactionChain, Lib_AddressRes
 
             mstore(add(chainElementStart, 1), ctxTimestamp)
             mstore(add(chainElementStart, 33), ctxBlockNumber)
-            // solhint-disable-next-line max-line-length
             pop(staticcall(gas(), 0x04, add(txData, 0x20), txDataLength, add(chainElementStart, BYTES_TILL_TX_DATA), txDataLength))
 
             leafHash := keccak256(chainElementStart, add(BYTES_TILL_TX_DATA, txDataLength))
