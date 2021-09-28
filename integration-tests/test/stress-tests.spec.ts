@@ -198,44 +198,47 @@ describe('stress tests', () => {
       )
     }).timeout(STRESS_TEST_TIMEOUT)
 
-    it(`${numTransactions} L2 transactions, L1 => L2 transactions, L2 => L1 transactions (all parallel)`, async () => {
-      await Promise.all([
-        executeRepeatedL1ToL2TransactionsParallel(
-          env,
-          {
-            contract: L2SimpleStorage,
-            functionName: 'setValue',
-            functionParams: [`0x${'42'.repeat(32)}`],
-          },
-          numTransactions
-        ),
-        executeRepeatedL2ToL1TransactionsParallel(
-          env,
-          {
-            contract: L1SimpleStorage,
-            functionName: 'setValue',
-            functionParams: [`0x${'42'.repeat(32)}`],
-          },
-          numTransactions
-        ),
-        executeRepeatedL2TransactionsParallel(
-          env,
-          {
-            contract: L2SimpleStorage,
-            functionName: 'setValueNotXDomain',
-            functionParams: [`0x${'42'.repeat(32)}`],
-          },
-          numTransactions
-        ),
-      ])
+    it.only(
+      `${numTransactions} L2 transactions, L1 => L2 transactions, L2 => L1 transactions (all parallel)`,
+      async () => {
+        await Promise.all([
+          executeRepeatedL1ToL2TransactionsParallel(
+            env,
+            {
+              contract: L2SimpleStorage,
+              functionName: 'setValue',
+              functionParams: [`0x${'42'.repeat(32)}`],
+            },
+            numTransactions
+          ),
+          executeRepeatedL2ToL1TransactionsParallel(
+            env,
+            {
+              contract: L1SimpleStorage,
+              functionName: 'setValue',
+              functionParams: [`0x${'42'.repeat(32)}`],
+            },
+            numTransactions
+          ),
+          executeRepeatedL2TransactionsParallel(
+            env,
+            {
+              contract: L2SimpleStorage,
+              functionName: 'setValueNotXDomain',
+              functionParams: [`0x${'42'.repeat(32)}`],
+            },
+            numTransactions
+          ),
+        ])
 
-      expect((await L2SimpleStorage.totalCount()).toNumber()).to.equal(
-        numTransactions * 2
-      )
+        expect((await L2SimpleStorage.totalCount()).toNumber()).to.equal(
+          numTransactions * 2
+        )
 
-      expect((await L1SimpleStorage.totalCount()).toNumber()).to.equal(
-        numTransactions
-      )
-    }).timeout(STRESS_TEST_TIMEOUT)
+        expect((await L1SimpleStorage.totalCount()).toNumber()).to.equal(
+          numTransactions
+        )
+      }
+    ).timeout(STRESS_TEST_TIMEOUT * 2)
   })
 })
