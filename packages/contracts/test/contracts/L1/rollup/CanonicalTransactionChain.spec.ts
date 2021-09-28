@@ -570,6 +570,37 @@ describe('CanonicalTransactionChain', () => {
       ).to.be.revertedWith('Function can only be called by the Sequencer.')
     })
 
+    it('should emit the previous blockhash in the TransactionBatchAppended event', async () => {
+      const timestamp = await getEthTime(ethers.provider)
+      const currentBlockHash = await (
+        await ethers.provider.getBlock('latest')
+      ).hash
+      const blockNumber = await getNextBlockNumber(ethers.provider)
+      const res = await appendSequencerBatch(CanonicalTransactionChain, {
+        transactions: ['0x1234'],
+        contexts: [
+          {
+            numSequencedTransactions: 1,
+            numSubsequentQueueTransactions: 0,
+            timestamp,
+            blockNumber,
+          },
+        ],
+        shouldStartAtElement: 0,
+        totalElementsToAppend: 1,
+      })
+      const receipt = await res.wait()
+
+      // Because the res value is returned by a sendTransaction type, we need to manually
+      // decode the logs.
+      const eventArgs = ethers.utils.defaultAbiCoder.decode(
+        ['uint256', 'bytes32', 'uint256', 'uint256', 'bytes'],
+        receipt.logs[0].data
+      )
+
+      await expect(eventArgs[0]).to.eq(currentBlockHash)
+    })
+
     for (const size of ELEMENT_TEST_SIZES) {
       const target = NON_ZERO_ADDRESS
       const gasLimit = 500_000
