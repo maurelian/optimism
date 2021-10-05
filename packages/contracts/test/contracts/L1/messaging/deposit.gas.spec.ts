@@ -156,7 +156,7 @@ describe('[GAS BENCHMARK] Depositing via the standard bridge', () => {
         (((regenesis040Cost - gasUsed) / regenesis040Cost) * 100).toFixed(2) +
           '%'
       )
-      expectApprox(gasUsed, 154_247, {
+      expectApprox(gasUsed, 155_089, {
         absoluteUpperDeviation: 500,
         // Assert a lower bound of 1% reduction on gas cost. If your tests are breaking because your
         // contracts are too efficient, consider updating the target value!
@@ -193,7 +193,7 @@ describe('[GAS BENCHMARK] Depositing via the standard bridge', () => {
         (((regenesis040Cost - gasUsed) / regenesis040Cost) * 100).toFixed(2) +
           '%'
       )
-      expectApprox(gasUsed, 202_088, {
+      expectApprox(gasUsed, 202_930, {
         absoluteUpperDeviation: 500,
         // Assert a lower bound of 1% reduction on gas cost. If your tests are breaking because your
         // contracts are too efficient, consider updating the target value!

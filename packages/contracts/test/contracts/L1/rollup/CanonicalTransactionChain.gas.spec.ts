@@ -331,7 +331,7 @@ describe('[GAS BENCHMARK] CanonicalTransactionChain', () => {
       console.log('Benchmark complete.')
       console.log('Gas used:', gasUsed)
 
-      expectApprox(gasUsed, 157_822, {
+      expectApprox(gasUsed, 158_690, {
         absoluteUpperDeviation: 500,
         // Assert a lower bound of 1% reduction on gas cost. If your tests are breaking because your
         // contracts are too efficient, consider updating the target value!
