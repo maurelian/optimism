@@ -88,7 +88,7 @@ contract L1StandardBridge is IL1StandardBridge, CrossDomainEnabled {
         _initiateETHDeposit(
             msg.sender,
             msg.sender,
-            500_000,
+            150_000,
             bytes("")
         );
     }
