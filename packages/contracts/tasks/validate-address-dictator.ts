@@ -6,7 +6,7 @@ import * as types from 'hardhat/internal/core/params/argumentTypes'
 import { hexStringEquals } from '@eth-optimism/core-utils'
 import { getContractFactory } from '../src/contract-defs'
 
-import { getInput, color as c } from '../src/task-utils'
+import { getInput, color as c, getArtifact } from '../src/task-utils'
 
 const printComparison = (
   action: string,
@@ -114,32 +114,13 @@ Chain ID: ${network.chainId}`
       // Check for addresses that will not be changed:
       const currentAddress = await managerContract.getAddress(pair.name)
       const addressChanged = !hexStringEquals(currentAddress, pair.addr)
+      const artifact = getArtifact(pair.name)
+
       if (addressChanged) {
         console.log(`${pair.name} address will be updated.`)
         console.log(`Before ${currentAddress}`)
         console.log(`After ${pair.addr}`)
 
-        const locations = {
-          ChainStorageContainer_CTC_batches:
-            'L1/rollup/ChainStorageContainer.sol/ChainStorageContainer.json',
-          ChainStorageContainer_SCC_batches:
-            'L1/rollup/ChainStorageContainer.sol/ChainStorageContainer.json',
-          CanonicalTransactionChain:
-            'L1/rollup/CanonicalTransactionChain.sol/CanonicalTransactionChain.json',
-          StateCommitmentChain:
-            'L1/rollup/StateCommitmentChain.sol/StateCommitmentChain.json',
-          BondManager: 'L1/verification/BondManager.sol/BondManager.json',
-          OVM_L1CrossDomainMessenger:
-            'L1/messaging/L1CrossDomainMessenger.sol/L1CrossDomainMessenger.json',
-          Proxy__OVM_L1CrossDomainMessenger:
-            'libraries/resolver/Lib_ResolvedDelegateProxy.sol/Lib_ResolvedDelegateProxy.json',
-          Proxy__OVM_L1StandardBridge:
-            './chugsplash/L1ChugSplashProxy.sol/L1ChugSplashProxy.json',
-        }
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const artifact = require(`../artifacts/contracts/${
-          locations[pair.name]
-        }`)
         const code = await provider.getCode(pair.addr)
         printComparison(
           `Verifying ${pair.name} source code against local deployment artifacts`,

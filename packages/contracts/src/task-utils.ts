@@ -36,3 +36,26 @@ export const color = Object.fromEntries(
     (msg: string) => `${codes[k]}${msg}${codes.reset}`,
   ])
 )
+
+export const getArtifact = (name: string) => {
+  // Paths to artifacts relative to artifacts/contracts
+  const locations = {
+    ChainStorageContainer_CTC_batches:
+      'L1/rollup/ChainStorageContainer.sol/ChainStorageContainer.json',
+    ChainStorageContainer_SCC_batches:
+      'L1/rollup/ChainStorageContainer.sol/ChainStorageContainer.json',
+    CanonicalTransactionChain:
+      'L1/rollup/CanonicalTransactionChain.sol/CanonicalTransactionChain.json',
+    StateCommitmentChain:
+      'L1/rollup/StateCommitmentChain.sol/StateCommitmentChain.json',
+    BondManager: 'L1/verification/BondManager.sol/BondManager.json',
+    OVM_L1CrossDomainMessenger:
+      'L1/messaging/L1CrossDomainMessenger.sol/L1CrossDomainMessenger.json',
+    Proxy__OVM_L1CrossDomainMessenger:
+      'libraries/resolver/Lib_ResolvedDelegateProxy.sol/Lib_ResolvedDelegateProxy.json',
+    Proxy__OVM_L1StandardBridge:
+      'chugsplash/L1ChugSplashProxy.sol/L1ChugSplashProxy.json',
+  }
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  return require(`../artifacts/contracts/${locations[name]}`)
+}
