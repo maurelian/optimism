@@ -15,8 +15,8 @@ import { names } from '../src/address-names'
 // to make a modification to hardhat-ovm. However, I don't have the time right now to figure the
 // details of how to make that work cleanly. This is fine in the meantime.
 const deployFn: DeployFunction = async (hre) => {
-  // Only execute this step if we're on the hardhat chain ID.
-  if (await isHardhatNode(hre)) {
+  // Only execute this step if we're on the hardhat chain ID and the fundL2Accounts flag is set.
+  if ((await isHardhatNode(hre)) && (hre as any).deployConfig.fundL2Accounts) {
     const L1StandardBridge = await getContractFromArtifact(
       hre,
       names.managed.contracts.Proxy__OVM_L1StandardBridge,
