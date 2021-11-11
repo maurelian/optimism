@@ -11,35 +11,8 @@ import {
   color as c,
   getArtifact,
   getEtherscanUrl,
+  printComparison,
 } from '../src/task-utils'
-
-const truncateLongString = (value: string): string => {
-  return value.length > 60 ? `${value.slice(0, 60)}...` : value
-}
-
-const printComparison = (
-  action: string,
-  description: string,
-  expected: { name: string; value: string },
-  deployed: { name: string; value: string }
-) => {
-  console.log(action + ':')
-  if (hexStringEquals(expected.value, deployed.value)) {
-    console.log(
-      c.green(`
-      ${expected.name}: ${truncateLongString(expected.value)}
-      matches
-      ${deployed.name}: ${truncateLongString(deployed.value)}
-    `)
-    )
-    console.log(c.green(`${description} looks good! 😎`))
-  } else {
-    throw new Error(`${description} looks wrong.
-    ${expected.value}\ndoes not match\n${deployed.value}.
-    `)
-  }
-  console.log() // Add some whitespace
-}
 
 task('validate:address-dictator')
   // Provided by the signature Requestor
@@ -143,14 +116,15 @@ Now validating the Address Dictator deployment at\n${getEtherscanUrl(
     for (const pair of namedAddresses) {
       // Check for addresses that will not be changed:
       const currentAddress = await managerContract.getAddress(pair.name)
-      const addressChanged = !hexStringEquals(currentAddress, pair.addr)
-
       const artifact = getArtifact(pair.name)
-
+      const addressChanged = !hexStringEquals(currentAddress, pair.addr)
       if (addressChanged) {
-        console.log(`${pair.name} address will be updated.`)
-        console.log(`Before ${currentAddress}`)
-        console.log(`After ${pair.addr}`)
+        console.log(
+          c.cyan(`
+Now validating the ${pair.name} deployment.
+Current address: ${getEtherscanUrl(network, currentAddress)}
+Upgraded address ${getEtherscanUrl(network, pair.addr)}`)
+        )
 
         const code = await provider.getCode(pair.addr)
         printComparison(
@@ -160,27 +134,28 @@ Now validating the Address Dictator deployment at\n${getEtherscanUrl(
             name: 'artifact.deployedBytecode',
             value: artifact.deployedBytecode,
           },
-          { name: 'Deployed bytecode', value: code }
+          { name: 'Deployed bytecode        ', value: code }
         )
-      } else {
-        console.log(`${pair.name} will not be updated`)
-      }
-      if (Object.keys(artifact)) {
-        if (artifact.abi.some((el) => el.name === 'libAddressManager')) {
-          const libAddressManager = await getContractFactory(
-            'Lib_AddressResolver'
-          )
-            .attach(pair.addr)
-            .connect(provider)
-            .libAddressManager()
 
-          printComparison(
-            `Verifying ${pair.name} has the correct AddressManager address`,
-            `The AddressManager address in ${pair.name}`,
-            libAddressManager,
-            manager
-          )
+        if (Object.keys(artifact)) {
+          if (artifact.abi.some((el) => el.name === 'libAddressManager')) {
+            const libAddressManager = await getContractFactory(
+              'Lib_AddressResolver'
+            )
+              .attach(pair.addr)
+              .connect(provider)
+              .libAddressManager()
+
+            printComparison(
+              `Verifying ${pair.name} has the correct AddressManager address`,
+              `The AddressManager address in ${pair.name}`,
+              { name: 'Deployed value', value: libAddressManager },
+              { name: 'Expected value', value: manager }
+            )
+          }
         }
       }
+      await getInput(c.yellow('Hit enter when ready to continue.'))
     }
+    console.log(c.green('Validation complete'))
   })
