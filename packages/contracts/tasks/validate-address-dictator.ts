@@ -116,6 +116,7 @@ Chain ID: ${network.chainId}`
       // Check for addresses that will not be changed:
       const currentAddress = await managerContract.getAddress(pair.name)
       const addressChanged = !hexStringEquals(currentAddress, pair.addr)
+
       const artifact = getArtifact(pair.name)
 
       if (addressChanged) {
@@ -135,7 +136,9 @@ Chain ID: ${network.chainId}`
       }
       if (Object.keys(artifact)) {
         if (artifact.abi.some((el) => el.name === 'libAddressManager')) {
-          const libAddressManager = await getContractFactory(pair.name)
+          const libAddressManager = await getContractFactory(
+            'Lib_AddressResolver'
+          )
             .attach(pair.addr)
             .connect(provider)
             .libAddressManager()

@@ -40,9 +40,9 @@ export const color = Object.fromEntries(
 export const getArtifact = (name: string) => {
   // Paths to artifacts relative to artifacts/contracts
   const locations = {
-    ChainStorageContainer_CTC_batches:
+    'ChainStorageContainer-CTC-batches':
       'L1/rollup/ChainStorageContainer.sol/ChainStorageContainer.json',
-    ChainStorageContainer_SCC_batches:
+    'ChainStorageContainer-SCC-batches':
       'L1/rollup/ChainStorageContainer.sol/ChainStorageContainer.json',
     CanonicalTransactionChain:
       'L1/rollup/CanonicalTransactionChain.sol/CanonicalTransactionChain.json',
