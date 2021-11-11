@@ -66,8 +66,9 @@ export const getEtherscanUrl = (network, address: string) => {
   return `https://${escPrefix}etherscan.io/address/${address}`
 }
 
+// Reduces a byte string to first 32 bytes, with a '...' to indicate when it was shortened
 const truncateLongString = (value: string): string => {
-  return value.length > 60 ? `${value.slice(0, 60)}...` : value
+  return value.length > 66 ? `${value.slice(0, 66)}...` : value
 }
 
 export const printComparison = (
@@ -79,11 +80,11 @@ export const printComparison = (
   console.log(action + ':')
   if (hexStringEquals(expected.value, deployed.value)) {
     console.log(
-      color.green(`
-      ${expected.name}: ${truncateLongString(expected.value)}
+      color.green(
+        `${expected.name}: ${truncateLongString(expected.value)}
       matches
-      ${deployed.name}: ${truncateLongString(deployed.value)}
-    `)
+${deployed.name}: ${truncateLongString(deployed.value)}`
+      )
     )
     console.log(color.green(`${description} looks good! 😎`))
   } else {

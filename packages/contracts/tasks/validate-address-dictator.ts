@@ -12,7 +12,7 @@ import {
   getArtifact,
   getEtherscanUrl,
   printComparison,
-} from '../src/task-utils'
+} from '../src/validation-utils'
 
 task('validate:address-dictator')
   // Provided by the signature Requestor
