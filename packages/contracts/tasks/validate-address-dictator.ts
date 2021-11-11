@@ -51,8 +51,10 @@ task('validate:address-dictator')
     types.string
   )
   .setAction(async (args) => {
-    if (!process.env.CONTRACTS_RPC_URL) {
-      throw new Error(c.red('CONTRACTS_RPC_URL not set in your env.'))
+    if (!args.contractsRpcUrl) {
+      throw new Error(
+        c.red('RPC URL must be set in your env, or passed as an argument.')
+      )
     }
     const provider = new ethers.providers.JsonRpcProvider(args.contractsRpcUrl)
 
