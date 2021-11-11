@@ -10,7 +10,7 @@ import {
   color as c,
   getEtherscanUrl,
   printComparison,
-} from '../src/task-utils'
+} from '../src/validation-utils'
 
 task('validate:chugsplash-dictator')
   // Provided by the signature Requestor
