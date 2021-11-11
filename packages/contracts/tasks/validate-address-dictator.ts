@@ -11,7 +11,9 @@ import {
   color as c,
   getArtifact,
   getEtherscanUrl,
+  logSectionHead,
   printComparison,
+  checkDeployedConfig,
 } from '../src/validation-utils'
 
 task('validate:address-dictator')
@@ -49,7 +51,7 @@ task('validate:address-dictator')
 
     const network = await provider.getNetwork()
     console.log()
-    console.log(c.cyan("First make sure you're on the right chain:"))
+    logSectionHead("First make sure you're on the right chain:")
     console.log(
       `Reading from the ${c.red(network.name)} network (Chain ID: ${c.red(
         '' + network.chainId
@@ -59,13 +61,12 @@ task('validate:address-dictator')
 
     const dictatorArtifact = getContractDefinition('AddressDictator')
     const dictatorCode = await provider.getCode(args.dictator)
-    console.log(
-      c.cyan(`
-Now validating the Address Dictator deployment at\n${getEtherscanUrl(
-        network,
-        args.dictator
-      )}`)
-    )
+    logSectionHead(`
+Validate the Address Dictator deployment at\n${getEtherscanUrl(
+      network,
+      args.dictator
+    )}`)
+
     printComparison(
       'Comparing deployed AddressDictator bytecode against local build artifacts',
       'Deployed AddressDictator code',
@@ -110,11 +111,10 @@ Now validating the Address Dictator deployment at\n${getEtherscanUrl(
       const artifact = getArtifact(pair.name)
       const addressChanged = !hexStringEquals(currentAddress, pair.addr)
       if (addressChanged) {
-        console.log(
-          c.cyan(`
-Now validating the ${pair.name} deployment.
+        logSectionHead(
+          `Validate the ${pair.name} deployment.
 Current address: ${getEtherscanUrl(network, currentAddress)}
-Upgraded address ${getEtherscanUrl(network, pair.addr)}`)
+Upgraded address ${getEtherscanUrl(network, pair.addr)}`
         )
 
         const code = await provider.getCode(pair.addr)
@@ -145,10 +145,11 @@ Upgraded address ${getEtherscanUrl(network, pair.addr)}`)
               { name: 'Deployed value', value: libAddressManager },
               { name: 'Expected value', value: manager }
             )
+            await getInput(c.yellow('OK? Hit enter to continue.'))
           }
         }
       }
-      await getInput(c.yellow('OK? Hit enter to continue.'))
+      await checkDeployedConfig(provider, pair)
     }
     console.log(c.green('AddressManager Validation complete!'))
   })
