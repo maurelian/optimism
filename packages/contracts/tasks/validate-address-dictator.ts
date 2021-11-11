@@ -63,8 +63,8 @@ Validating the deployment on the chain with:
 Name: ${network.name}
 Chain ID: ${network.chainId}`
     )
-    const res = await getInput(c.yellow('Does that look right? (LGTM/n)\n> '))
-    if (res !== 'LGTM') {
+    const res = await getInput(c.yellow('Does that look right? (Y/n)\n> '))
+    if (res !== 'Y') {
       throw new Error(
         c.red('User indicated that validation was run against the wrong chain')
       )
@@ -130,6 +130,21 @@ Chain ID: ${network.chainId}`
         )
       } else {
         console.log(`${pair.name} not updated`)
+      }
+      if (Object.keys(artifact)) {
+        if (artifact.abi.some((el) => el.name === 'libAddressManager')) {
+          const libAddressManager = await getContractFactory(pair.name)
+            .attach(pair.addr)
+            .connect(provider)
+            .libAddressManager()
+
+          printComparison(
+            `Verifying ${pair.name} has the correct AddressManager address`,
+            `The AddressManager address in ${pair.name}`,
+            libAddressManager,
+            manager
+          )
+        }
       }
     }
   })
