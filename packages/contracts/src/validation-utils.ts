@@ -30,9 +30,9 @@ export const color = Object.fromEntries(
   ])
 )
 
-export const getArtifact = (name: string) => {
-  // Paths to artifacts relative to artifacts/contracts
-  const locations = {
+// helper for finding the right artifact from the deployed name
+const location = (name: string) => {
+  return {
     'ChainStorageContainer-CTC-batches':
       'L1/rollup/ChainStorageContainer.sol/ChainStorageContainer.json',
     'ChainStorageContainer-SCC-batches':
@@ -48,9 +48,12 @@ export const getArtifact = (name: string) => {
       'libraries/resolver/Lib_ResolvedDelegateProxy.sol/Lib_ResolvedDelegateProxy.json',
     Proxy__OVM_L1StandardBridge:
       'chugsplash/L1ChugSplashProxy.sol/L1ChugSplashProxy.json',
-  }
+  }[name]
+}
+
+export const getArtifact = (name: string) => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  return require(`../artifacts/contracts/${locations[name]}`)
+  return require(`../artifacts/contracts/${location(name)}`)
 }
 
 export const getEtherscanUrl = (network, address: string) => {

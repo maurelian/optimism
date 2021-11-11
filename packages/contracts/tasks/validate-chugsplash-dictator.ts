@@ -3,7 +3,7 @@
 import { ethers } from 'ethers'
 import { task } from 'hardhat/config'
 import * as types from 'hardhat/internal/core/params/argumentTypes'
-import { getContractFactory } from '../src/contract-defs'
+import { getContractFactory, getContractDefinition } from '../src/contract-defs'
 
 import {
   getInput,
@@ -55,8 +55,7 @@ task('validate:chugsplash-dictator')
     )
     await getInput(c.yellow('OK? Hit enter to continue.'))
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const dictatorArtifact = require('../artifacts/contracts/L1/deployment/ChugSplashDictator.sol/ChugSplashDictator.json')
+    const dictatorArtifact = getContractDefinition('ChugSplashDictator')
     const dictatorCode = await provider.getCode(args.dictator)
     console.log(
       c.cyan(`
@@ -129,8 +128,9 @@ Now validating the Chugsplash Dictator deployment at\n${getEtherscanUrl(
     )
     await getInput(c.yellow('OK? Hit enter to continue.'))
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const bridgeArtifact = require('../artifacts/contracts/L1/messaging/L1StandardBridge.sol/L1StandardBridge.json')
+    // // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // const bridgeArtifact = require('../artifacts/contracts/L1/messaging/L1StandardBridge.sol/L1StandardBridge.json')
+    const bridgeArtifact = getContractDefinition('L1StandardBridge')
     const expectedCodeHash = ethers.utils.keccak256(
       bridgeArtifact.deployedBytecode
     )

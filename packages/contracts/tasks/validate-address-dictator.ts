@@ -4,7 +4,7 @@ import { ethers } from 'ethers'
 import { task } from 'hardhat/config'
 import * as types from 'hardhat/internal/core/params/argumentTypes'
 import { hexStringEquals } from '@eth-optimism/core-utils'
-import { getContractFactory } from '../src/contract-defs'
+import { getContractFactory, getContractDefinition } from '../src/contract-defs'
 
 import {
   getInput,
@@ -57,8 +57,7 @@ task('validate:address-dictator')
     )
     await getInput(c.yellow('OK? Hit enter to continue.'))
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const dictatorArtifact = require('../artifacts/contracts/L1/deployment/AddressDictator.sol/AddressDictator.json')
+    const dictatorArtifact = getContractDefinition('AddressDictator')
     const dictatorCode = await provider.getCode(args.dictator)
     console.log(
       c.cyan(`
