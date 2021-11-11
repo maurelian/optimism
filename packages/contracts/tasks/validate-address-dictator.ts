@@ -6,19 +6,37 @@ import * as types from 'hardhat/internal/core/params/argumentTypes'
 import { hexStringEquals } from '@eth-optimism/core-utils'
 import { getContractFactory } from '../src/contract-defs'
 
-import { getInput, color as c, getArtifact } from '../src/task-utils'
+import {
+  getInput,
+  color as c,
+  getArtifact,
+  getEtherscanUrl,
+} from '../src/task-utils'
+
+const truncateLongString = (value: string): string => {
+  return value.length > 60 ? `${value.slice(0, 60)}...` : value
+}
 
 const printComparison = (
   action: string,
   description: string,
-  value1: string,
-  value2: string
+  expected: { name: string; value: string },
+  deployed: { name: string; value: string }
 ) => {
   console.log(action + ':')
-  if (hexStringEquals(value1, value2)) {
+  if (hexStringEquals(expected.value, deployed.value)) {
+    console.log(
+      c.green(`
+      ${expected.name}: ${truncateLongString(expected.value)}
+      matches
+      ${deployed.name}: ${truncateLongString(deployed.value)}
+    `)
+    )
     console.log(c.green(`${description} looks good! 😎`))
   } else {
-    throw new Error(`${description} looks wrong`)
+    throw new Error(`${description} looks wrong.
+    ${expected.value}\ndoes not match\n${deployed.value}.
+    `)
   }
   console.log() // Add some whitespace
 }
@@ -61,11 +79,13 @@ task('validate:address-dictator')
     const network = await provider.getNetwork()
     console.log(
       `
-Validating the deployment on the chain with:
-Name: ${network.name}
-Chain ID: ${network.chainId}`
+Reading from the ${c.red(network.name)} network (Chain ID: ${c.red(
+        '' + network.chainId
+      )})`
     )
-    const res = await getInput(c.yellow('Does that look right? (Y/n)\n> '))
+    const res = await getInput(
+      c.yellow('Please confirm that this is the correct network? (Y/n)\n> ')
+    )
     if (res !== 'Y') {
       throw new Error(
         c.red('User indicated that validation was run against the wrong chain')
@@ -75,11 +95,18 @@ Chain ID: ${network.chainId}`
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const dictatorArtifact = require('../artifacts/contracts/L1/deployment/AddressDictator.sol/AddressDictator.json')
     const dictatorCode = await provider.getCode(args.dictator)
+    console.log(
+      c.cyan(`
+Now validating the Address Dictator deployment at\n${getEtherscanUrl(
+        network,
+        args.dictator
+      )}`)
+    )
     printComparison(
-      'Verifying AddressDictator source code against local build artifacts',
+      'Comparing deployed AddressDictator bytecode against local build artifacts',
       'Deployed AddressDictator code',
-      dictatorArtifact.deployedBytecode,
-      dictatorCode
+      { name: 'Compiled bytecode', value: dictatorArtifact.deployedBytecode },
+      { name: 'Deployed bytecode', value: dictatorCode }
     )
 
     // connect to the deployed AddressDictator
@@ -89,19 +116,20 @@ Chain ID: ${network.chainId}`
 
     const finalOwner = await dictatorContract.finalOwner()
     printComparison(
-      'Validating that finalOwner address in the AddressDictator matches multisig address',
+      'Comparing the finalOwner address in the AddressDictator to the multisig address',
       'finalOwner',
-      finalOwner,
-      args.multisig
+      { name: 'multisig address', value: args.multisig },
+      { name: 'finalOwner', value: finalOwner }
     )
 
     const manager = await dictatorContract.manager()
     printComparison(
       'Validating the AddressManager address in the AddressDictator',
       'addressManager',
-      manager,
-      args.manager
+      { name: 'manager', value: args.manager },
+      { name: 'Address Manager', value: manager }
     )
+    await getInput(c.yellow('Hit enter when ready to continue.'))
 
     // Get names and addresses from the Dictator.
     const namedAddresses = await dictatorContract.getNamedAddresses()
@@ -128,11 +156,14 @@ Chain ID: ${network.chainId}`
         printComparison(
           `Verifying ${pair.name} source code against local deployment artifacts`,
           `Deployed ${pair.name} code`,
-          artifact.deployedBytecode,
-          code
+          {
+            name: 'artifact.deployedBytecode',
+            value: artifact.deployedBytecode,
+          },
+          { name: 'Deployed bytecode', value: code }
         )
       } else {
-        console.log(`${pair.name} not updated`)
+        console.log(`${pair.name} will not be updated`)
       }
       if (Object.keys(artifact)) {
         if (artifact.abi.some((el) => el.name === 'libAddressManager')) {

@@ -59,3 +59,8 @@ export const getArtifact = (name: string) => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   return require(`../artifacts/contracts/${locations[name]}`)
 }
+
+export const getEtherscanUrl = (network, address: string) => {
+  const escPrefix = network.chainId !== 1 ? `${network.name}.` : ''
+  return `https://${escPrefix}etherscan.io/address/${address}`
+}
