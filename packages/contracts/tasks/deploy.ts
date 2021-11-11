@@ -80,6 +80,12 @@ task('deploy')
     undefined,
     types.string
   )
+  .addOptionalParam(
+    'fundL2Accounts',
+    'Runs the final deployment step only needed in CI.',
+    false,
+    types.boolean
+  )
   .setAction(async (args, hre: any, runSuper) => {
     // Necessary because hardhat doesn't let us attach non-optional parameters to existing tasks.
     const validateAddressArg = (argName: string) => {
