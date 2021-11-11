@@ -1,4 +1,5 @@
 import { createInterface } from 'readline'
+import { hexStringEquals } from '@eth-optimism/core-utils'
 
 export const getInput = (query) => {
   const rl = createInterface({
@@ -58,4 +59,37 @@ export const getArtifact = (name: string) => {
   }
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   return require(`../artifacts/contracts/${locations[name]}`)
+}
+
+export const getEtherscanUrl = (network, address: string) => {
+  const escPrefix = network.chainId !== 1 ? `${network.name}.` : ''
+  return `https://${escPrefix}etherscan.io/address/${address}`
+}
+
+const truncateLongString = (value: string): string => {
+  return value.length > 60 ? `${value.slice(0, 60)}...` : value
+}
+
+export const printComparison = (
+  action: string,
+  description: string,
+  expected: { name: string; value: string },
+  deployed: { name: string; value: string }
+) => {
+  console.log(action + ':')
+  if (hexStringEquals(expected.value, deployed.value)) {
+    console.log(
+      color.green(`
+      ${expected.name}: ${truncateLongString(expected.value)}
+      matches
+      ${deployed.name}: ${truncateLongString(deployed.value)}
+    `)
+    )
+    console.log(color.green(`${description} looks good! 😎`))
+  } else {
+    throw new Error(`${description} looks wrong.
+    ${expected.value}\ndoes not match\n${deployed.value}.
+    `)
+  }
+  console.log() // Add some whitespace
 }
