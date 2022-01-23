@@ -132,4 +132,40 @@ describe('Bridged tokens', () => {
       BigNumber.from(0)
     )
   }).timeout(isLiveNetwork() ? 300_000 : 120_000)
+
+  it('should fail to withdraw from a fake L2 token to a real L1 token', async function() {
+      if (await isMainnet(env)) {
+        console.log('Skipping withdrawals test on mainnet.')
+        this.skip()
+        return
+      }
+      const balBefore = await L1__ERC20.balanceOf(env.l1Wallet.address)
+
+      const L2Factory__FakeStandardERC20 = await ethers.getContractFactory(
+        'FakeL2StandardERC20',
+        env.l2Wallet
+      )
+      const fakeToken = await L2Factory__FakeStandardERC20.deploy(L1__ERC20)
+      await fakeToken.deployed()
+
+      const tx = await env.l2Bridge.withdraw(
+        fakeToken.address,
+        500,
+        1_000_000,
+        '0x'
+      )
+      await env.relayXDomainMessages(tx)
+      const { remoteTx } = await env.waitForXDomainTransaction(
+        tx,
+        Direction.L2ToL1
+      )
+      console.log('remoteTx:', remoteTx)
+
+      expect(await L1__ERC20.balanceOf(env.l1Wallet.address)).to.deep.equal(
+        balBefore
+      )
+      expect(await L2__ERC20.balanceOf(env.l2Wallet.address)).to.deep.equal(
+        BigNumber.from(0)
+      )
+    }).timeout(isLiveNetwork() ? 300_000 : 120_000)
 })
