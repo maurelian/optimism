@@ -64,10 +64,27 @@ function blockedMessages(bytes32) external view returns (bool)
 |---|---|---|
 | _0 | bool | undefined
 
+### finalizationPeriod
+
+```solidity
+function finalizationPeriod() external view returns (uint256)
+```
+
+Minimum time that must elapse before a withdrawal can be finalized.
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined
+
 ### initialize
 
 ```solidity
-function initialize(address _libAddressManager) external nonpayable
+function initialize(address _libAddressManager, uint256 _finalizationPeriod) external nonpayable
 ```
 
 
@@ -79,6 +96,7 @@ function initialize(address _libAddressManager) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | _libAddressManager | address | Address of the Address Manager.
+| _finalizationPeriod | uint256 | undefined
 
 ### libAddressManager
 
@@ -145,7 +163,7 @@ function paused() external view returns (bool)
 ### relayMessage
 
 ```solidity
-function relayMessage(address _target, address _sender, bytes _message, uint256 _messageNonce, IL1CrossDomainMessenger.L2MessageInclusionProof _proof) external nonpayable
+function relayMessage(address _target, address _sender, bytes _message, uint256 _messageNonce, uint256 _timestamp, WithdrawalVerifier.OutputRootProof _outputRootProof, bytes _withdrawalProof) external nonpayable
 ```
 
 Relays a cross domain message to a contract.
@@ -160,7 +178,9 @@ Relays a cross domain message to a contract.
 | _sender | address | Message sender address.
 | _message | bytes | Message to send to the target.
 | _messageNonce | uint256 | Nonce for the provided message.
-| _proof | IL1CrossDomainMessenger.L2MessageInclusionProof | Inclusion proof for the given message.
+| _timestamp | uint256 | L2 timestamp of the outputRoot.
+| _outputRootProof | WithdrawalVerifier.OutputRootProof | Inclusion proof of the withdrawer contracts storage root.
+| _withdrawalProof | bytes | Inclusion proof for the given withdrawal in the withdrawer contract.
 
 ### relayedMessages
 
@@ -447,6 +467,42 @@ event Unpaused(address account)
 | Name | Type | Description |
 |---|---|---|
 | account  | address | undefined |
+
+
+
+## Errors
+
+### InvalidOutputRootProof
+
+```solidity
+error InvalidOutputRootProof()
+```
+
+Error emitted when the output root proof is invalid.
+
+
+
+
+### InvalidWithdrawalInclusionProof
+
+```solidity
+error InvalidWithdrawalInclusionProof()
+```
+
+Error emitted when the withdrawal inclusion proof is invalid.
+
+
+
+
+### NotYetFinal
+
+```solidity
+error NotYetFinal()
+```
+
+Error emitted when attempting to finalize a withdrawal too early.
+
+
 
 
 

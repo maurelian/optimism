@@ -10,11 +10,12 @@ import { Lib_SecureMerkleTrie } from "../../libraries/trie/Lib_SecureMerkleTrie.
 import { Lib_DefaultValues } from "../../libraries/constants/Lib_DefaultValues.sol";
 import { Lib_PredeployAddresses } from "../../libraries/constants/Lib_PredeployAddresses.sol";
 import { Lib_CrossDomainUtils } from "../../libraries/bridge/Lib_CrossDomainUtils.sol";
+import { WithdrawalVerifier } from "../../libraries/bridge/Lib_WithdrawalVerifier.sol";
 
 /* Interface Imports */
 import { IL1CrossDomainMessenger } from "./IL1CrossDomainMessenger.sol";
 import { ICanonicalTransactionChain } from "../rollup/ICanonicalTransactionChain.sol";
-import { IStateCommitmentChain } from "../rollup/IStateCommitmentChain.sol";
+import { L2OutputOracle } from "../rollup/L2OutputOracle.sol";
 
 /* External Imports */
 import {
@@ -49,9 +50,25 @@ contract L1CrossDomainMessenger is
 
     event MessageAllowed(bytes32 indexed _xDomainCalldataHash);
 
+    /**********
+     * Errors *
+     **********/
+
+    /// @notice Error emitted when attempting to finalize a withdrawal too early.
+    error NotYetFinal();
+
+    /// @notice Error emitted when the output root proof is invalid.
+    error InvalidOutputRootProof();
+
+    /// @notice Error emitted when the withdrawal inclusion proof is invalid.
+    error InvalidWithdrawalInclusionProof();
+
     /**********************
      * Contract Variables *
      **********************/
+
+    /// @notice Minimum time that must elapse before a withdrawal can be finalized.
+    uint256 public finalizationPeriod;
 
     mapping(bytes32 => bool) public blockedMessages;
     mapping(bytes32 => bool) public relayedMessages;
@@ -78,13 +95,17 @@ contract L1CrossDomainMessenger is
      * @param _libAddressManager Address of the Address Manager.
      */
     // slither-disable-next-line external-function
-    function initialize(address _libAddressManager) public initializer {
+    function initialize(address _libAddressManager, uint256 _finalizationPeriod)
+        public
+        initializer
+    {
         require(
             address(libAddressManager) == address(0),
             "L1CrossDomainMessenger already intialized."
         );
         libAddressManager = Lib_AddressManager(_libAddressManager);
         xDomainMsgSender = Lib_DefaultValues.DEFAULT_XDOMAIN_SENDER;
+        finalizationPeriod = _finalizationPeriod;
 
         // Initialize upgradable OZ contracts
         __Context_init_unchained(); // Context is a dependency for both Ownable and Pausable
@@ -214,8 +235,11 @@ contract L1CrossDomainMessenger is
         address _sender,
         bytes memory _message,
         uint256 _messageNonce,
-        L2MessageInclusionProof memory _proof
+        uint256 _timestamp,
+        WithdrawalVerifier.OutputRootProof calldata _outputRootProof,
+        bytes calldata _withdrawalProof
     ) public nonReentrant whenNotPaused {
+        // This is the data sent to the L1MessagePasser from the L2CrossDomainMessenger.
         bytes memory xDomainCalldata = Lib_CrossDomainUtils.encodeXDomainCalldata(
             _target,
             _sender,
@@ -224,7 +248,12 @@ contract L1CrossDomainMessenger is
         );
 
         require(
-            _verifyXDomainMessage(xDomainCalldata, _proof) == true,
+            _verifyXDomainMessage(
+                _timestamp,
+                xDomainCalldata,
+                _outputRootProof,
+                _withdrawalProof
+            ) == true,
             "Provided message could not be verified."
         );
 
@@ -277,49 +306,32 @@ contract L1CrossDomainMessenger is
     /**
      * Verifies that the given message is valid.
      * @param _xDomainCalldata Calldata to verify.
-     * @param _proof Inclusion proof for the message.
+     * @param _outputRootProof Struct containing the elements hashed together to generate the output
+     *   root.
+     * @param _withdrawalProof Merkle trie inclusion proof for the desired node.
      * @return Whether or not the provided message is valid.
      */
     function _verifyXDomainMessage(
+        uint256 _timestamp,
         bytes memory _xDomainCalldata,
-        L2MessageInclusionProof memory _proof
+        WithdrawalVerifier.OutputRootProof calldata _outputRootProof,
+        bytes calldata _withdrawalProof
     ) internal view returns (bool) {
-        return (_verifyStateRootProof(_proof) && _verifyStorageProof(_xDomainCalldata, _proof));
-    }
+        // Check that the timestamp is 7 days old.
+        unchecked {
+            if (block.timestamp < _timestamp + finalizationPeriod) {
+                revert NotYetFinal();
+            }
+        }
 
-    /**
-     * Verifies that the state root within an inclusion proof is valid.
-     * @param _proof Message inclusion proof.
-     * @return Whether or not the provided proof is valid.
-     */
-    function _verifyStateRootProof(L2MessageInclusionProof memory _proof)
-        internal
-        view
-        returns (bool)
-    {
-        IStateCommitmentChain ovmStateCommitmentChain = IStateCommitmentChain(
-            resolve("StateCommitmentChain")
-        );
+        // Get the output root.
+        bytes32 outputRoot = L2OutputOracle(resolve("L2OutputOracle")).getL2Output(_timestamp);
 
-        return (ovmStateCommitmentChain.insideFraudProofWindow(_proof.stateRootBatchHeader) ==
-            false &&
-            ovmStateCommitmentChain.verifyStateCommitment(
-                _proof.stateRoot,
-                _proof.stateRootBatchHeader,
-                _proof.stateRootProof
-            ));
-    }
+        // Verify that the output root can be generated with the elements in the proof.
+        if (outputRoot != WithdrawalVerifier._deriveOutputRoot(_outputRootProof)) {
+            revert InvalidOutputRootProof();
+        }
 
-    /**
-     * Verifies that the storage proof within an inclusion proof is valid.
-     * @param _xDomainCalldata Encoded message calldata.
-     * @param _proof Message inclusion proof.
-     * @return Whether or not the provided proof is valid.
-     */
-    function _verifyStorageProof(
-        bytes memory _xDomainCalldata,
-        L2MessageInclusionProof memory _proof
-    ) internal view returns (bool) {
         bytes32 storageKey = keccak256(
             abi.encodePacked(
                 keccak256(
@@ -328,31 +340,16 @@ contract L1CrossDomainMessenger is
                         Lib_PredeployAddresses.L2_CROSS_DOMAIN_MESSENGER
                     )
                 ),
-                uint256(0)
+                uint256(0) // The withdrawals mapping is at the first slot in the layout.
             )
-        );
-
-        (bool exists, bytes memory encodedMessagePassingAccount) = Lib_SecureMerkleTrie.get(
-            abi.encodePacked(Lib_PredeployAddresses.L2_TO_L1_MESSAGE_PASSER),
-            _proof.stateTrieWitness,
-            _proof.stateRoot
-        );
-
-        require(
-            exists == true,
-            "Message passing predeploy has not been initialized or invalid proof provided."
-        );
-
-        Lib_OVMCodec.EVMAccount memory account = Lib_OVMCodec.decodeEVMAccount(
-            encodedMessagePassingAccount
         );
 
         return
             Lib_SecureMerkleTrie.verifyInclusionProof(
                 abi.encodePacked(storageKey),
-                abi.encodePacked(uint8(1)),
-                _proof.storageTrieWitness,
-                account.storageRoot
+                hex"01",
+                _withdrawalProof,
+                _outputRootProof.withdrawerStorageRoot
             );
     }
 

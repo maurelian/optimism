@@ -33,7 +33,7 @@ describe('L1CrossDomainMessenger', () => {
 
   let Fake__TargetContract: FakeContract
   let Fake__L2CrossDomainMessenger: FakeContract
-  let Fake__StateCommitmentChain: FakeContract
+  let Fake__L2OutputOracle: FakeContract
   before(async () => {
     Fake__TargetContract = await smock.fake<Contract>('Helper_SimpleProxy')
     Fake__L2CrossDomainMessenger = await smock.fake<Contract>(
@@ -42,9 +42,7 @@ describe('L1CrossDomainMessenger', () => {
         address: predeploys.L2CrossDomainMessenger,
       }
     )
-    Fake__StateCommitmentChain = await smock.fake<Contract>(
-      'StateCommitmentChain'
-    )
+    Fake__L2OutputOracle = await smock.fake<Contract>('L2OutputOracle')
   })
 
   let AddressManager: Contract
@@ -57,11 +55,7 @@ describe('L1CrossDomainMessenger', () => {
       Fake__L2CrossDomainMessenger.address
     )
 
-    await setProxyTarget(
-      AddressManager,
-      'StateCommitmentChain',
-      Fake__StateCommitmentChain
-    )
+    await setProxyTarget(AddressManager, 'L2OutputOracle', Fake__L2OutputOracle)
 
     CanonicalTransactionChain = await deploy('CanonicalTransactionChain', {
       args: [
@@ -102,7 +96,7 @@ describe('L1CrossDomainMessenger', () => {
 
     L1CrossDomainMessenger = xDomainMessengerImpl.attach(proxy.address)
 
-    await L1CrossDomainMessenger.initialize(AddressManager.address)
+    await L1CrossDomainMessenger.initialize(AddressManager.address, 0)
   })
 
   describe('pause', () => {

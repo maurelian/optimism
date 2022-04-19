@@ -3,6 +3,7 @@ pragma solidity ^0.8.9;
 
 /* Library Imports */
 import { Lib_OVMCodec } from "../../libraries/codec/Lib_OVMCodec.sol";
+import { WithdrawalVerifier } from "../../libraries/bridge/Lib_WithdrawalVerifier.sol";
 
 /* Interface Imports */
 import { ICrossDomainMessenger } from "../../libraries/bridge/ICrossDomainMessenger.sol";
@@ -33,14 +34,18 @@ interface IL1CrossDomainMessenger is ICrossDomainMessenger {
      * @param _sender Message sender address.
      * @param _message Message to send to the target.
      * @param _messageNonce Nonce for the provided message.
-     * @param _proof Inclusion proof for the given message.
+     * @param _timestamp L2 timestamp of the outputRoot.
+     * @param _outputRootProof Inclusion proof of the withdrawer contracts storage root.
+     * @param _withdrawalProof Inclusion proof for the given withdrawal in the withdrawer contract.
      */
     function relayMessage(
         address _target,
         address _sender,
         bytes memory _message,
         uint256 _messageNonce,
-        L2MessageInclusionProof memory _proof
+        uint256 _timestamp,
+        WithdrawalVerifier.OutputRootProof calldata _outputRootProof,
+        bytes calldata _withdrawalProof
     ) external;
 
     /**

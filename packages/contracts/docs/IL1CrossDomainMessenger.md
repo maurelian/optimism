@@ -13,7 +13,7 @@
 ### relayMessage
 
 ```solidity
-function relayMessage(address _target, address _sender, bytes _message, uint256 _messageNonce, IL1CrossDomainMessenger.L2MessageInclusionProof _proof) external nonpayable
+function relayMessage(address _target, address _sender, bytes _message, uint256 _messageNonce, uint256 _timestamp, WithdrawalVerifier.OutputRootProof _outputRootProof, bytes _withdrawalProof) external nonpayable
 ```
 
 Relays a cross domain message to a contract.
@@ -28,7 +28,9 @@ Relays a cross domain message to a contract.
 | _sender | address | Message sender address.
 | _message | bytes | Message to send to the target.
 | _messageNonce | uint256 | Nonce for the provided message.
-| _proof | IL1CrossDomainMessenger.L2MessageInclusionProof | Inclusion proof for the given message.
+| _timestamp | uint256 | L2 timestamp of the outputRoot.
+| _outputRootProof | WithdrawalVerifier.OutputRootProof | Inclusion proof of the withdrawer contracts storage root.
+| _withdrawalProof | bytes | Inclusion proof for the given withdrawal in the withdrawer contract.
 
 ### replayMessage
 
