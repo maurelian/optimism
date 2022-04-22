@@ -9,8 +9,6 @@ import {
   setProxyTarget,
   NON_NULL_BYTES32,
   NON_ZERO_ADDRESS,
-  DUMMY_BATCH_HEADERS,
-  DUMMY_BATCH_PROOFS,
   L2_GAS_DISCOUNT_DIVISOR,
   ENQUEUE_GAS_COST,
   TrieTestGenerator,
@@ -82,6 +80,7 @@ describe('L1CrossDomainMessenger', () => {
   })
 
   let L1CrossDomainMessenger: Contract
+  const finalizationPeriod = 100
   beforeEach(async () => {
     const xDomainMessengerImpl = await deploy('L1CrossDomainMessenger')
 
@@ -96,7 +95,10 @@ describe('L1CrossDomainMessenger', () => {
 
     L1CrossDomainMessenger = xDomainMessengerImpl.attach(proxy.address)
 
-    await L1CrossDomainMessenger.initialize(AddressManager.address, 0)
+    await L1CrossDomainMessenger.initialize(
+      AddressManager.address,
+      finalizationPeriod
+    )
   })
 
   describe('pause', () => {
@@ -375,12 +377,12 @@ describe('L1CrossDomainMessenger', () => {
     })
 
     const proof = {
-      stateRoot: toHexString(generator._trie.root),
-      stateRootBatchHeader: DUMMY_BATCH_HEADERS[0],
-      stateRootProof: DUMMY_BATCH_PROOFS[0],
-      stateTrieWitness: (
-        await generator.makeAccountProofTest(predeploys.OVM_L2ToL1MessagePasser)
-      ).accountTrieWitness,
+      outputRootProof: {
+        version: ethers.constants.HashZero,
+        stateRoot: toHexString(generator._trie.root),
+        withdrawerStorageRoot: toHexString(storageGenerator._trie.root),
+        latestBlockhash: ethers.constants.HashZero,
+      },
       storageTrieWitness: (
         await storageGenerator.makeInclusionProofTest(storageKey)
       ).proof,
@@ -392,17 +394,34 @@ describe('L1CrossDomainMessenger', () => {
     }
   }
 
+  const generateOutputRoot = (outputElements: {
+    version: string
+    stateRoot: string
+    withdrawerStorageRoot: string
+    latestBlockhash: string
+  }) => {
+    const { version, stateRoot, withdrawerStorageRoot, latestBlockhash } =
+      outputElements
+    return ethers.utils.solidityKeccak256(
+      ['bytes32', 'bytes32', 'bytes32', 'bytes32'],
+      [version, stateRoot, withdrawerStorageRoot, latestBlockhash]
+    )
+  }
+
   describe('relayMessage', () => {
     let target: string
     let message: string
     let proof: any
     let calldata: string
+    let timestamp: number
+    let outputRoot: string
     before(async () => {
       target = Fake__TargetContract.address
       message = Fake__TargetContract.interface.encodeFunctionData('setTarget', [
         NON_ZERO_ADDRESS,
       ])
 
+      timestamp = (await getEthTime(ethers.provider)) - finalizationPeriod - 100
       const mockProof = await generateMockRelayMessageProof(
         target,
         signer1.address,
@@ -410,33 +429,41 @@ describe('L1CrossDomainMessenger', () => {
       )
       proof = mockProof.proof
       calldata = mockProof.calldata
+
+      outputRoot = generateOutputRoot(
+        proof.outputRootProof
+      )
     })
 
     beforeEach(async () => {
-      Fake__StateCommitmentChain.verifyStateCommitment.returns(true)
-      Fake__StateCommitmentChain.insideFraudProofWindow.returns(false)
-    })
+      Fake__L2OutputOracle.getL2Output.returns(outputRoot)
+      // update timestamp before each run so to avoid
+      // timestamp = (await getEthTime(ethers.provider)) - finalizationPeriod - 100
+    });
 
     it('should revert if still inside the fraud proof window', async () => {
-      Fake__StateCommitmentChain.insideFraudProofWindow.returns(true)
-
-      const proof1 = {
+      const outputRootProof1 = {
+        version: ethers.constants.HashZero,
         stateRoot: ethers.constants.HashZero,
-        stateRootBatchHeader: DUMMY_BATCH_HEADERS[0],
-        stateRootProof: DUMMY_BATCH_PROOFS[0],
-        stateTrieWitness: '0x',
-        storageTrieWitness: '0x',
+        withdrawerStorageRoot: ethers.constants.HashZero,
+        latestBlockhash: ethers.constants.HashZero,
       }
 
+      // set timestamp of the output to current time.
+      const recentTimestamp = await getEthTime(ethers.provider)
+      Fake__L2OutputOracle.getL2Output.returns(ethers.constants.HashZero)
       await expect(
         L1CrossDomainMessenger.relayMessage(
           target,
           signer1.address,
           message,
           0,
-          proof1
+          recentTimestamp,
+          outputRootProof1,
+          '0x00'
         )
-      ).to.be.revertedWith('Provided message could not be verified.')
+        // hardhat doesn't yet support custom errors, so we can't specify the error message.
+      ).to.be.revertedWith('NotYetFinal()')
     })
 
     it('should revert if attempting to relay a message sent to an L1 system contract', async () => {
@@ -446,29 +473,31 @@ describe('L1CrossDomainMessenger', () => {
         message
       )
 
+      const maliciousOutputRoot = generateOutputRoot(
+        maliciousProof.proof.outputRootProof
+      )
+      Fake__L2OutputOracle.getL2Output.returns(maliciousOutputRoot)
+
+      // set timestamp of the output to the current time minus the finalization period plus a bit
+      timestamp = (await getEthTime(ethers.provider)) - finalizationPeriod - 20
+
       await expect(
         L1CrossDomainMessenger.relayMessage(
           CanonicalTransactionChain.address,
           signer1.address,
           message,
           0,
-          maliciousProof.proof
+          timestamp,
+          maliciousProof.proof.outputRootProof,
+          maliciousProof.proof.storageTrieWitness
         )
       ).to.be.revertedWith(
         'Cannot send L2->L1 messages to L1 system contracts.'
       )
     })
 
-    it('should revert if provided an invalid state root proof', async () => {
-      Fake__StateCommitmentChain.verifyStateCommitment.returns(false)
-
-      const proof1 = {
-        stateRoot: ethers.constants.HashZero,
-        stateRootBatchHeader: DUMMY_BATCH_HEADERS[0],
-        stateRootProof: DUMMY_BATCH_PROOFS[0],
-        stateTrieWitness: '0x',
-        storageTrieWitness: '0x',
-      }
+    it('should revert if provided an invalid output root proof', async () => {
+      Fake__L2OutputOracle.getL2Output.returns(ethers.constants.HashZero)
 
       await expect(
         L1CrossDomainMessenger.relayMessage(
@@ -476,9 +505,11 @@ describe('L1CrossDomainMessenger', () => {
           signer1.address,
           message,
           0,
-          proof1
+          timestamp,
+          proof.outputRootProof,
+          proof.storageTrieWitness
         )
-      ).to.be.revertedWith('Provided message could not be verified.')
+      ).to.be.reverted
     })
 
     it('should revert if provided an invalid storage trie witness', async () => {
@@ -488,25 +519,9 @@ describe('L1CrossDomainMessenger', () => {
           signer1.address,
           message,
           0,
-          {
-            ...proof,
-            storageTrieWitness: '0x',
-          }
-        )
-      ).to.be.reverted
-    })
-
-    it('should revert if provided an invalid state trie witness', async () => {
-      await expect(
-        L1CrossDomainMessenger.relayMessage(
-          target,
-          signer1.address,
-          message,
-          0,
-          {
-            ...proof,
-            stateTrieWitness: '0x',
-          }
+          timestamp,
+          proof.outputRootProof,
+          '0x'
         )
       ).to.be.reverted
     })
@@ -514,12 +529,15 @@ describe('L1CrossDomainMessenger', () => {
     it('should send a successful call to the target contract', async () => {
       const blockNumber = await getNextBlockNumber(ethers.provider)
 
+      Fake__L2OutputOracle.getL2Output.returns(outputRoot)
       await L1CrossDomainMessenger.relayMessage(
         target,
         signer1.address,
         message,
         0,
-        proof
+        timestamp,
+        proof.outputRootProof,
+        proof.storageTrieWitness
       )
 
       expect(
@@ -554,7 +572,9 @@ describe('L1CrossDomainMessenger', () => {
         signer1.address,
         message,
         0,
-        proof
+        timestamp,
+        proof.outputRootProof,
+        proof.storageTrieWitness
       )
 
       await expect(
@@ -568,7 +588,9 @@ describe('L1CrossDomainMessenger', () => {
         signer1.address,
         message,
         0,
-        proof
+        timestamp,
+        proof.outputRootProof,
+        proof.storageTrieWitness
       )
 
       await expect(
@@ -577,7 +599,10 @@ describe('L1CrossDomainMessenger', () => {
           signer1.address,
           message,
           0,
-          proof
+          timestamp,
+          proof.outputRootProof,
+
+          proof.storageTrieWitness
         )
       ).to.be.revertedWith('Provided message has already been received.')
     })
@@ -591,7 +616,9 @@ describe('L1CrossDomainMessenger', () => {
           signer1.address,
           message,
           0,
-          proof
+          timestamp,
+          proof.outputRootProof,
+          proof.storageTrieWitness
         )
       ).to.be.revertedWith('Pausable: paused')
     })
@@ -620,7 +647,9 @@ describe('L1CrossDomainMessenger', () => {
             signer1.address,
             message,
             0,
-            proof
+            timestamp,
+            proof.outputRootProof,
+            proof.storageTrieWitness
           )
         ).to.be.revertedWith('Provided message has been blocked.')
       })
@@ -636,7 +665,9 @@ describe('L1CrossDomainMessenger', () => {
             signer1.address,
             message,
             0,
-            proof
+            timestamp,
+            proof.outputRootProof,
+            proof.storageTrieWitness
           )
         ).to.be.revertedWith('Provided message has been blocked.')
 
@@ -650,7 +681,9 @@ describe('L1CrossDomainMessenger', () => {
             signer1.address,
             message,
             0,
-            proof
+            timestamp,
+            proof.outputRootProof,
+            proof.storageTrieWitness
           )
         ).to.not.be.reverted
       })

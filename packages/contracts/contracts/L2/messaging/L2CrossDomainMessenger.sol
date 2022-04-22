@@ -73,6 +73,7 @@ contract L2CrossDomainMessenger is IL2CrossDomainMessenger {
 
         // Actually send the message.
         // slither-disable-next-line reentrancy-no-eth, reentrancy-events
+        // todo: have this send to the Withdrawer contract for cheaper proofs
         iOVM_L2ToL1MessagePasser(Lib_PredeployAddresses.L2_TO_L1_MESSAGE_PASSER).passMessageToL1(
             xDomainCalldata
         );

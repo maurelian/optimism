@@ -247,6 +247,7 @@ contract L1CrossDomainMessenger is
             _messageNonce
         );
 
+        // todo: decide how to handle errors and where they should get thrown
         require(
             _verifyXDomainMessage(
                 _timestamp,
@@ -320,7 +321,7 @@ contract L1CrossDomainMessenger is
         // Check that the timestamp is 7 days old.
         unchecked {
             if (block.timestamp < _timestamp + finalizationPeriod) {
-                revert NotYetFinal();
+                revert("NotYetFinal()");
             }
         }
 
@@ -329,7 +330,7 @@ contract L1CrossDomainMessenger is
 
         // Verify that the output root can be generated with the elements in the proof.
         if (outputRoot != WithdrawalVerifier._deriveOutputRoot(_outputRootProof)) {
-            revert InvalidOutputRootProof();
+            revert("InvalidOutputRootProof()");
         }
 
         bytes32 storageKey = keccak256(
