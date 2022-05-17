@@ -25,6 +25,7 @@ contract OptimismPortal_Test is CommonTest {
     OptimismPortal op;
 
     function setUp() external {
+        _setUp();
         oracle = new L2OutputOracle(
             1800,
             2,

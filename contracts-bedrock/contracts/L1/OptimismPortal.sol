@@ -5,12 +5,13 @@ import { L2OutputOracle } from "./L2OutputOracle.sol";
 import { WithdrawalVerifier } from "../libraries/Lib_WithdrawalVerifier.sol";
 import { AddressAliasHelper } from "@eth-optimism/contracts/standards/AddressAliasHelper.sol";
 import { ExcessivelySafeCall } from "../libraries/ExcessivelySafeCall.sol";
+import { ResourceMetering } from "./ResourceMetering.sol";
 
 /**
  * @title OptimismPortal
  * This contract should be deployed behind an upgradable proxy.
  */
-contract OptimismPortal {
+contract OptimismPortal is ResourceMetering {
     /**
      * Emitted when a Transaction is deposited from L1 to L2. The parameters of this
      * event are read by the rollup node and used to derive deposit transactions on L2.
@@ -92,7 +93,7 @@ contract OptimismPortal {
         uint64 _gasLimit,
         bool _isCreation,
         bytes memory _data
-    ) public payable {
+    ) public payable metered(_gasLimit) {
         // Just to be safe, make sure that people specify address(0) as the target when doing
         // contract creations.
         // TODO: Do we really need this? Prevents some user error, but adds gas.
@@ -109,6 +110,8 @@ contract OptimismPortal {
             from = AddressAliasHelper.applyL1ToL2Alias(msg.sender);
         }
 
+        // Emit a TransactionDeposited event so that the rollup node can derive a deposit
+        // transaction for this deposit.
         emit TransactionDeposited(from, _to, msg.value, _value, _gasLimit, _isCreation, _data);
     }
 

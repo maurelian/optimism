@@ -2,7 +2,6 @@
 pragma solidity 0.8.10;
 
 import { CommonTest } from "./CommonTest.t.sol";
-
 import { ResourceMetering } from "../L1/ResourceMetering.sol";
 
 contract MeterUser is ResourceMetering {
@@ -14,9 +13,9 @@ contract ResourceMetering_Test is CommonTest {
     uint64 initialBlockNum;
 
     function setUp() external {
+        _setUp();
         meter = new MeterUser();
         initialBlockNum = uint64(block.number);
-        vm.fee(meter.INITIAL_BASE_FEE());
     }
 
     function test_initialResourceParams() external {
@@ -40,7 +39,6 @@ contract ResourceMetering_Test is CommonTest {
 
     function test_updateOneEmptyBlock() external {
         vm.roll(initialBlockNum + 1);
-        vm.fee(meter.INITIAL_BASE_FEE());
         meter.use(0);
         (uint128 prevBaseFee, uint64 prevBoughtGas, uint64 prevBlockNum) = meter.getResourceParams();
 
