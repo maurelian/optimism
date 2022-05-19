@@ -139,8 +139,14 @@ contract OptimismPortal is ResourceMetering {
         WithdrawalVerifier.OutputRootProof calldata _outputRootProof,
         bytes calldata _withdrawalProof
     ) external payable {
-        // Prevent direct reentrancy and prevent users from creating a deposit transaction where
-        // this address is the message sender on L2.
+        // Prevent reentrancy.
+        require(
+            l2Sender == DEFAULT_L2_SENDER,
+            "OptimismPortal: can only trigger one withdrawal per transaction"
+        );
+
+        // Prevent users from creating a deposit transaction where this address is the message
+        // sender on L2.
         require(
             _target != address(this),
             "OptimismPortal: you cannot send messages to the portal contract"
@@ -206,10 +212,6 @@ contract OptimismPortal is ResourceMetering {
 
         // Set the l2Sender so contracts know who triggered this withdrawal on L2.
         l2Sender = _sender;
-
-        // TODO: Do we want reentrancy protection by checking that l2Sender is not the default L2
-        // sender value? Right now it's possible to reenter this function if you really wanted to
-        // (with a different withdrawal, can't be the same withdrawal twice).
 
         // Trigger the call to the target contract. We use excessivelySafeCall because we don't
         // care about the returndata and we don't want target contracts to be able to force this
