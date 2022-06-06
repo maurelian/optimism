@@ -168,6 +168,8 @@ contract L2ERC721Bridge is IL2ERC721Bridge, CrossDomainEnabled {
             // message so that users can get their NFT out in some cases.
             // There is no way to prevent malicious token contracts altogether, but this does limit
             // user error and mitigate some forms of malicious contract behavior.
+            address l1Sender = _from;
+            address l2Receiver = _to;
             bytes memory message = abi.encodeWithSelector(
                 IL1ERC721Bridge.finalizeERC721Withdrawal.selector,
                 _l1Token,

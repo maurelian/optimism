@@ -111,7 +111,7 @@ contract L1ERC721Bridge is IL1ERC721Bridge, CrossDomainEnabled {
         // When a deposit is initiated on L1, the L1 Bridge transfers the NFT to itself for future
         // withdrawals.
         // slither-disable-next-line reentrancy-events, reentrancy-benign
-        IERC721(_l1Token).transferFrom(_from, address(this), _tokenId);
+        IERC721(_l1Token).transferFrom(_from, address(this), _tokenId); // assumes
 
         // Construct calldata for _l2Token.finalizeDeposit(_to, _tokenId)
         bytes memory message = abi.encodeWithSelector(
