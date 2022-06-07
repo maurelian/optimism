@@ -5,7 +5,7 @@ import { ContractFactory, Wallet } from 'ethers'
 import { expect } from './shared/setup'
 import { defaultTransactionFactory } from './shared/utils'
 import env from './shared/env'
-import counterArtifact from '../artifacts/Counter.sol/Counter.json'
+import counterArtifact from '../forge-artifacts/Counter.sol/Counter.json'
 
 describe('RPCs', () => {
   let wallet: Wallet
