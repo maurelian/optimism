@@ -777,8 +777,14 @@ func TestWithdrawals(t *testing.T) {
 
 	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Duration(cfg.L1BlockTime)*time.Second)
 	defer cancel()
-	timestamp, err := withdrawals.WaitForFinalizationPeriod(ctx, l1Client, sys.DepositContractAddr, header.Time)
+	timestamp, err := withdrawals.WaitForFinalizationPeriod(ctx, l1Client, sys.DepositContractAddr, header.Time, header.Number.Uint64())
 	require.Nil(t, err)
+
+	// blocknumber = historicalTotalBlocks + (timestamp - historicalTotalBlocks.timestamp)/submissionInterval
+	blockNumber := cfg.L2OOCfg.HistoricalTotalBlocks + timestamp /
+	// what is the correct way to access the timestamp of the starting block?
+
+
 
 	ctx, cancel = context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()

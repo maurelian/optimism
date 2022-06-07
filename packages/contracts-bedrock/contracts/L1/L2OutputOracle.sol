@@ -52,9 +52,6 @@ contract L2OutputOracle is Ownable {
     /// @notice The number of blocks in the chain before the first block in this contract.
     uint256 public immutable HISTORICAL_TOTAL_BLOCKS;
 
-    /// @notice The number of the first L2 block recorded in this contract.
-    uint256 public immutable STARTING_BLOCK_NUMBER;
-
     /// @notice The number of the most recent L2 block recorded in this contract.
     uint256 public latestBlockNumber;
 
@@ -72,21 +69,19 @@ contract L2OutputOracle is Ownable {
      * @param _genesisL2Output The initial L2 output of the L2 chain.
      * @param _historicalTotalBlocks The number of blocks that preceding the
      *        initialization of the L2 chain.
-     * @param _startingBlockNumber The number to start L2 block at.
      */
     constructor(
         uint256 _submissionInterval,
         bytes32 _genesisL2Output,
         uint256 _historicalTotalBlocks,
-        uint256 _startingBlockNumber,
         address sequencer
     ) {
         SUBMISSION_INTERVAL = _submissionInterval;
-        l2Outputs[_startingBlockNumber] = OutputProposal(_genesisL2Output, block.timestamp);
         HISTORICAL_TOTAL_BLOCKS = _historicalTotalBlocks;
-        latestBlockNumber = _startingBlockNumber;
-        // TODO: I think we can just remove this now. It's no longer needed in computeL2BlockNumber.
-        STARTING_BLOCK_NUMBER = _startingBlockNumber;
+        latestBlockNumber = _historicalTotalBlocks + 1;
+
+        // We append the L2 genesis output corresponding to the first bedrock block
+        l2Outputs[latestBlockNumber] = OutputProposal(_genesisL2Output, block.timestamp);
 
         _transferOwnership(sequencer);
     }
