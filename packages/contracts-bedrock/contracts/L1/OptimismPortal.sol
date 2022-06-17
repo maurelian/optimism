@@ -149,9 +149,17 @@ contract OptimismPortal is ResourceMetering {
 
     function isOutputFinalized(uint256 _l2BlockNumber) external view returns (bool) {
         L2OutputOracle.OutputProposal memory proposal = L2_ORACLE.getL2Output(_l2BlockNumber);
-        // todo: Should this not return true if the previous check pointed block _is_ finalized?
+        uint256 interval = L2_ORACLE.SUBMISSION_INTERVAL();
         if (proposal.outputRoot == bytes32(uint256(0))) {
-            return false;
+            // Find the distance between the _l2BlockNumber, and the checkpoint block before it.
+            uint256 offset = (_l2BlockNumber - L2_ORACLE.STARTING_BLOCK_NUMBER()) %
+                interval;
+            // Look up the checkpoint block after it.
+            proposal = L2_ORACLE.getL2Output(_l2BlockNumber +  (interval - offset));
+            // False if that block is not yet appended.
+            if (proposal.outputRoot == bytes32(uint256(0))) {
+                return false;
+            }
         }
         return block.timestamp > proposal.timestamp + FINALIZATION_PERIOD_SECONDS;
     }
