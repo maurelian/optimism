@@ -87,7 +87,9 @@ func defaultSystemConfig(t *testing.T) SystemConfig {
 		},
 		L2OOCfg: L2OOContractConfig{
 			// L2 Start time is set based off of the L2 Genesis time
-			SubmissionFrequency:   big.NewInt(2),
+			// Increasing these numbers seems to reduce the number of failures.
+			SubmissionFrequency:   big.NewInt(4),
+			L2BlockTime:           big.NewInt(2), // this number was previously set in setup.go. Overwriting it here just simplifies debugging.
 			HistoricalTotalBlocks: big.NewInt(0),
 		},
 		L2OutputHDPath:             l2OutputHDPath,
@@ -160,6 +162,7 @@ func TestL2OutputSubmitter(t *testing.T) {
 
 	initialOutputBlockNumber, err := l2OutputOracle.LatestBlockNumber(&bind.CallOpts{})
 	require.Nil(t, err)
+	println(initialOutputBlockNumber.Text(10))
 
 	// Wait until the second output submission from L2. The output submitter submits outputs from the
 	// unsafe portion of the chain which gets reorged on startup. The sequencer has an out of date view
@@ -171,7 +174,7 @@ func TestL2OutputSubmitter(t *testing.T) {
 	require.Nil(t, err)
 
 	// Wait for batch submitter to update L2 output oracle.
-	timeoutCh := time.After(15 * time.Second)
+	timeoutCh := time.After(20 * time.Second)
 	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
 	for {
@@ -181,8 +184,12 @@ func TestL2OutputSubmitter(t *testing.T) {
 		// Wait for the L2 output oracle to have been changed from the initial
 		// timestamp set in the contract constructor.
 		if l2ooBlockNumber.Cmp(initialOutputBlockNumber) > 0 {
+			println(l2ooBlockNumber.Text(10), initialOutputBlockNumber.Text(10))
+
 			// Retrieve the l2 output committed at this updated timestamp.
+			// get from the contract
 			committedL2Output, err := l2OutputOracle.GetL2Output(&bind.CallOpts{}, l2ooBlockNumber)
+
 			require.NotEqual(t, [32]byte{}, committedL2Output.OutputRoot, "Empty L2 Output")
 			require.Nil(t, err)
 
@@ -193,7 +200,12 @@ func TestL2OutputSubmitter(t *testing.T) {
 			// finalized.
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
+
+			// get from the client...
 			l2Output, err := rollupClient.OutputAtBlock(ctx, l2ooBlockNumber)
+			println(l2ooBlockNumber.Text(10))
+			fmt.Println("output from oracle",common.BytesToHash(committedL2Output.OutputRoot[:]))
+			fmt.Println("output from client", common.BytesToHash(l2Output[1][:]))
 			require.Nil(t, err)
 			require.Len(t, l2Output, 2)
 

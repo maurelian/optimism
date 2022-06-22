@@ -185,6 +185,10 @@ func (d *Driver) CraftTx(
 	opts.Nonce = nonce
 	opts.NoSend = true
 
+	// This will print many times during the course of a single run of TestL2OutputSubmitter.
+	// When the test fail, it prints the same output for block 2 each time.
+	// When the test passes, the output at block 2 changes the very last time it is printed.
+	fmt.Println("appending:", common.BytesToHash(l2OutputRoot[:]).TerminalString()[0:10], ", at:", nextCheckpointBlock)
 	return d.l2ooContract.AppendL2Output(opts, l2OutputRoot, nextCheckpointBlock, l1Header.Hash(), l1Header.Number)
 }
 
