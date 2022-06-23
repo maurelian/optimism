@@ -336,11 +336,10 @@ contract L2OutputOracleTest is L2OutputOracle_Initializer {
 }
 
 contract L2OutputOracleUpgradeable_Test is L2OutputOracle_Initializer {
-    L2OutputOracle oracleImpl;
     Proxy internal proxy;
     uint64 initialBlockNum;
 
-    function setUp() override public {
+    function setUp() public override {
         super.setUp();
         initialBlockNum = uint64(block.number);
 
@@ -367,7 +366,9 @@ contract L2OutputOracleUpgradeable_Test is L2OutputOracle_Initializer {
         assertEq(startingTimestamp, oracleImpl.STARTING_TIMESTAMP());
         assertEq(l2BlockTime, oracleImpl.L2_BLOCK_TIME());
 
-        L2OutputOracle.OutputProposal memory initOutput = oracleImpl.getL2Output(startingBlockNumber);
+        L2OutputOracle.OutputProposal memory initOutput = oracleImpl.getL2Output(
+            startingBlockNumber
+        );
         assertEq(genesisL2Output, initOutput.outputRoot);
         assertEq(initL1Time, initOutput.timestamp);
 
@@ -383,5 +384,32 @@ contract L2OutputOracleUpgradeable_Test is L2OutputOracle_Initializer {
     function test_cannotInitImpl() external {
         vm.expectRevert("Initializable: contract is already initialized");
         address(oracleImpl).call(abi.encodeWithSelector(L2OutputOracle.initialize.selector));
+    }
+
+    function test_upgrading() external {
+        L2OutputOracle newOracleImpl = new L2OutputOracle(
+            submissionInterval,
+            genesisL2Output,
+            historicalTotalBlocks,
+            startingBlockNumber,
+            startingTimestamp,
+            l2BlockTime,
+            sequencer,
+            owner
+        );
+        vm.startPrank(alice);
+        proxy.upgradeToAndCall(
+            address(newOracleImpl),
+            abi.encodeWithSelector(
+                L2OutputOracle.initialize.selector,
+                genesisL2Output,
+                startingBlockNumber,
+                sequencer,
+                owner
+            )
+        );
+        assertEq(proxy.implementation(), address(newOracleImpl));
+
+
     }
 }
