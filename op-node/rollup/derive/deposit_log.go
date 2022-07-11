@@ -31,7 +31,7 @@ var (
 //
 // Additionally, the event log-index and
 func UnmarshalDepositLogEvent(ev *types.Log) (*types.DepositTx, error) {
-	if len(ev.Topics) != 3 {
+	if len(ev.Topics) != 4 {
 		return nil, fmt.Errorf("expected 3 event topics (event identity, indexed from, indexed to)")
 	}
 	if ev.Topics[0] != DepositEventABIHash {
@@ -41,6 +41,7 @@ func UnmarshalDepositLogEvent(ev *types.Log) (*types.DepositTx, error) {
 		return nil, fmt.Errorf("deposit event data too small (%d bytes): %x", len(ev.Data), ev.Data)
 	}
 
+	// here we start creating the deposit transaction data
 	var dep types.DepositTx
 
 	source := UserDepositSource{
@@ -53,6 +54,9 @@ func UnmarshalDepositLogEvent(ev *types.Log) (*types.DepositTx, error) {
 	dep.From = common.BytesToAddress(ev.Topics[1][12:])
 	// indexed 1
 	to := common.BytesToAddress(ev.Topics[2][12:])
+
+	// Not sure why, but this code is already using the event data instead of just accessing the
+	// types from the bindings.
 
 	// unindexed data
 	offset := uint64(0)

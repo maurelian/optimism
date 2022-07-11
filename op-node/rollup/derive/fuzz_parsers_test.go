@@ -207,6 +207,8 @@ func FuzzUnmarshallLogEvent(f *testing.F) {
 			t.Fatalf("Could not unmarshal log that was emitted by the deposit contract: %v", err)
 		}
 
+		reconstructedData :=
+
 		reconstructed := &bindings.OptimismPortalTransactionDeposited{
 			From:       dep.From,
 			Value:      dep.Value,
