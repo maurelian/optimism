@@ -15,6 +15,7 @@ import { L2CrossDomainMessenger } from "../L2/L2CrossDomainMessenger.sol";
 import { AddressAliasHelper } from "../vendor/AddressAliasHelper.sol";
 import { LegacyERC20ETH } from "../legacy/LegacyERC20ETH.sol";
 import { Predeploys } from "../libraries/Predeploys.sol";
+import { Types } from "../libraries/Types.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { Proxy } from "../universal/Proxy.sol";
 import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
@@ -78,7 +79,6 @@ contract CommonTest is Test {
             abi.encodePacked(_mint, _value, _gasLimit, _isCreation, _data)
         );
     }
-
 }
 
 contract L2OutputOracle_Initializer is CommonTest {
@@ -142,10 +142,7 @@ contract L2OutputOracle_Initializer is CommonTest {
         vm.label(address(oracle), "L2OutputOracle");
 
         // Set the L2ToL1MessagePasser at the correct address
-        vm.etch(
-            Predeploys.L2_TO_L1_MESSAGE_PASSER,
-            address(new L2ToL1MessagePasser()).code
-        );
+        vm.etch(Predeploys.L2_TO_L1_MESSAGE_PASSER, address(new L2ToL1MessagePasser()).code);
 
         vm.label(Predeploys.L2_TO_L1_MESSAGE_PASSER, "L2ToL1MessagePasser");
     }
@@ -185,10 +182,7 @@ contract Messenger_Initializer is L2OutputOracle_Initializer {
         uint256 gasLimit
     );
 
-    event SentMessageExtension1(
-        address indexed sender,
-        uint256 value
-    );
+    event SentMessageExtension1(address indexed sender, uint256 value);
 
     event WithdrawalInitiated(
         uint256 indexed nonce,
@@ -272,12 +266,7 @@ contract Bridge_Initializer is Messenger_Initializer {
     ERC20 BadL2Token;
     OptimismMintableERC20 RemoteL1Token;
 
-    event ETHDepositInitiated(
-        address indexed from,
-        address indexed to,
-        uint256 amount,
-        bytes data
-    );
+    event ETHDepositInitiated(address indexed from, address indexed to, uint256 amount, bytes data);
 
     event ETHWithdrawalFinalized(
         address indexed from,
@@ -331,19 +320,9 @@ contract Bridge_Initializer is Messenger_Initializer {
         bytes data
     );
 
-    event ETHBridgeInitiated(
-        address indexed from,
-        address indexed to,
-        uint256 amount,
-        bytes data
-    );
+    event ETHBridgeInitiated(address indexed from, address indexed to, uint256 amount, bytes data);
 
-    event ETHBridgeFinalized(
-        address indexed from,
-        address indexed to,
-        uint256 amount,
-        bytes data
-    );
+    event ETHBridgeFinalized(address indexed from, address indexed to, uint256 amount, bytes data);
 
     event ERC20BridgeInitiated(
         address indexed localToken,
@@ -410,9 +389,7 @@ contract Bridge_Initializer is Messenger_Initializer {
             Predeploys.L2_STANDARD_BRIDGE
         );
         vm.etch(Predeploys.OPTIMISM_MINTABLE_ERC20_FACTORY, address(factory).code);
-        L2TokenFactory = OptimismMintableERC20Factory(
-            Predeploys.OPTIMISM_MINTABLE_ERC20_FACTORY
-        );
+        L2TokenFactory = OptimismMintableERC20Factory(Predeploys.OPTIMISM_MINTABLE_ERC20_FACTORY);
 
         vm.etch(Predeploys.LEGACY_ERC20_ETH, address(new LegacyERC20ETH()).code);
 
@@ -457,24 +434,26 @@ contract Bridge_Initializer is Messenger_Initializer {
 }
 
 contract FFIInterface is Test {
-    function getFinalizeWithdrawalTransactionInputs(
-        uint256 _nonce,
-        address _sender,
-        address _target,
-        uint64 _value,
-        uint256 _gasLimit,
-        bytes memory _data
-    ) external returns (bytes32, bytes32, bytes32, bytes32, bytes memory) {
+    function getFinalizeWithdrawalTransactionInputs(Types.WithdrawalTransaction memory _tx)
+        external
+        returns (
+            bytes32,
+            bytes32,
+            bytes32,
+            bytes32,
+            bytes memory
+        )
+    {
         string[] memory cmds = new string[](9);
         cmds[0] = "node";
         cmds[1] = "dist/scripts/differential-testing.js";
         cmds[2] = "getFinalizeWithdrawalTransactionInputs";
-        cmds[3] = vm.toString(_nonce);
-        cmds[4] = vm.toString(_sender);
-        cmds[5] = vm.toString(_target);
-        cmds[6] = vm.toString(_value);
-        cmds[7] = vm.toString(_gasLimit);
-        cmds[8] = vm.toString(_data);
+        cmds[3] = vm.toString(_tx.nonce);
+        cmds[4] = vm.toString(_tx.sender);
+        cmds[5] = vm.toString(_tx.target);
+        cmds[6] = vm.toString(_tx.value);
+        cmds[7] = vm.toString(_tx.gasLimit);
+        cmds[8] = vm.toString(_tx.data);
 
         bytes memory result = vm.ffi(cmds);
         (
@@ -638,18 +617,19 @@ contract Reverter {
 
 // Useful for testing reentrancy guards
 contract CallerCaller {
-    event WhatHappened(
-        bool success,
-        bytes returndata
-    );
+    event WhatHappened(bool success, bytes returndata);
 
     fallback() external {
         (bool success, bytes memory returndata) = msg.sender.call(msg.data);
         emit WhatHappened(success, returndata);
         assembly {
             switch success
-            case 0 { revert(add(returndata, 0x20), mload(returndata)) }
-            default { return(add(returndata, 0x20), mload(returndata)) }
+            case 0 {
+                revert(add(returndata, 0x20), mload(returndata))
+            }
+            default {
+                return(add(returndata, 0x20), mload(returndata))
+            }
         }
     }
 }
