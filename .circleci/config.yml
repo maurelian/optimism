@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   go: circleci/go@1.5.0
+  codecov: codecov/codecov@3.2.3
 
 jobs:
   yarn-monorepo:
@@ -137,12 +138,20 @@ jobs:
             slither --version
             yarn slither || exit 0
           working_directory: packages/contracts-bedrock
+      # - run:
+      #     name: test
+      #     command: yarn test
+      #     working_directory: packages/contracts-bedrock
+      #     environment:
+      #       FOUNDRY_PROFILE: ci
       - run:
-          name: test
-          command: yarn test
-          working_directory: packages/contracts-bedrock
+          name: coverage
+          command: yarn coverage
           environment:
             FOUNDRY_PROFILE: ci
+          working_directory: packages/contracts-bedrock
+      - codecov/upload
+
       - run:
           name: gas snapshot
           command: |
