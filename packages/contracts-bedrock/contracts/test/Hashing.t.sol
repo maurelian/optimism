@@ -23,21 +23,22 @@ contract Hashing_Test is CommonTest {
     }
 
     function test_hashCrossDomainMessage_differential(
-        uint256 _nonce,
+        uint240 _nonce,
+        uint16 _version,
         address _sender,
         address _target,
         uint256 _value,
         uint256 _gasLimit,
         bytes memory _data
     ) external {
-        // Discard any fuzz tests with an invalid version
-        (, uint16 version) = Encoding.decodeVersionedNonce(_nonce);
+        // Ensure the version is valid
+        uint16 version = uint16(bound(uint256(_version), 0, 1));
         vm.writeLine("inputs.txt", vm.toString(version));
-        vm.assume(version < 2);
+        uint256 nonce = Encoding.encodeVersionedNonce(_nonce, version);
         vm.writeLine("runs.txt", vm.toString(version));
 
         bytes32 _hash = ffi.hashCrossDomainMessage(
-            _nonce,
+            nonce,
             _sender,
             _target,
             _value,
@@ -46,7 +47,7 @@ contract Hashing_Test is CommonTest {
         );
 
         bytes32 hash = Hashing.hashCrossDomainMessage(
-            _nonce,
+            nonce,
             _sender,
             _target,
             _value,
