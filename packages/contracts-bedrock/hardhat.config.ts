@@ -362,9 +362,6 @@ const config: HardhatUserConfig = {
       },
     ],
     settings: {
-      metadata: {
-        bytecodeHash: 'none',
-      },
       outputSelection: {
         '*': {
           '*': ['metadata', 'storageLayout'],
