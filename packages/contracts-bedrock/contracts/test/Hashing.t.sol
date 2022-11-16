@@ -8,6 +8,8 @@ import { Encoding } from "../libraries/Encoding.sol";
 
 contract Hashing_Test is CommonTest {
     function setUp() external {
+        vm.writeFile("inputs.txt", "");
+        vm.writeFile("runs.txt", "");
         _setUp();
     }
 
@@ -30,7 +32,9 @@ contract Hashing_Test is CommonTest {
     ) external {
         // Discard any fuzz tests with an invalid version
         (, uint16 version) = Encoding.decodeVersionedNonce(_nonce);
+        vm.writeLine("inputs.txt", vm.toString(version));
         vm.assume(version < 2);
+        vm.writeLine("runs.txt", vm.toString(version));
 
         bytes32 _hash = ffi.hashCrossDomainMessage(
             _nonce,

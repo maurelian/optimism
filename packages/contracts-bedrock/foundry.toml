@@ -3,6 +3,8 @@ src = 'contracts'
 out = 'forge-artifacts'
 optimizer = true
 optimizer_runs = 999999
+fs_permissions = [{ access = "read-write", path = "./"}]
+
 
 remappings = [
   '@openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/',
@@ -21,3 +23,4 @@ fuzz_runs = 16
 
 [profile.ci]
 fuzz_runs = 512
+
