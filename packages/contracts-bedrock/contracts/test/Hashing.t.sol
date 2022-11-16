@@ -30,8 +30,8 @@ contract Hashing_Test is CommonTest {
         bytes memory _data
     ) external {
         // Ensure the version is valid
+        vm.writeLine("inputs.txt", vm.toString(_version));
         uint16 version = uint16(bound(uint256(_version), 0, 1));
-        vm.writeLine("inputs.txt", vm.toString(version));
         uint256 nonce = Encoding.encodeVersionedNonce(_nonce, version);
         vm.writeLine("runs.txt", vm.toString(version));
 
