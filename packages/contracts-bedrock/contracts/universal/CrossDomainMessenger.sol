@@ -260,7 +260,7 @@ abstract contract CrossDomainMessenger is
         uint256 _value,
         uint256 _minGasLimit,
         bytes calldata _message
-    ) external payable nonReentrant whenNotPaused {
+    ) external payable whenNotPaused {
         (, uint16 version) = Encoding.decodeVersionedNonce(_nonce);
         require(
             version < 2,
@@ -314,6 +314,10 @@ abstract contract CrossDomainMessenger is
             successfulMessages[versionedHash] == false,
             "CrossDomainMessenger: message has already been relayed"
         );
+        // Assume the message will succeed. If not, we'll reset this afterwards.
+        // By making this assumption we prevent attempts to execute the same message twice
+        // in a reentrant call.
+        successfulMessages[versionedHash] = true;
 
         require(
             gasleft() >= _minGasLimit + RELAY_GAS_REQUIRED,
@@ -325,9 +329,10 @@ abstract contract CrossDomainMessenger is
         xDomainMsgSender = Constants.DEFAULT_L2_SENDER;
 
         if (success == true) {
-            successfulMessages[versionedHash] = true;
             emit RelayedMessage(versionedHash);
         } else {
+            // Update statuses
+            successfulMessages[versionedHash] = false;
             failedMessages[versionedHash] = true;
             emit FailedRelayedMessage(versionedHash);
 
