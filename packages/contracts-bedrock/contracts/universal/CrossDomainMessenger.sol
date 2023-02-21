@@ -100,12 +100,27 @@ abstract contract CrossDomainMessenger is
      */
     mapping(bytes32 => bool) private spacer_202_0_32;
 
+    enum MessageStatus {
+        Unknown,
+        InFlight,
+        Failed,
+        Succeeded
+    }
+
     /**
      * @notice Mapping of message hashes to boolean receipt values. Note that a message will only
      *         be present in this mapping if it has successfully been relayed on this chain, and
      *         can therefore not be relayed again.
      */
-    mapping(bytes32 => bool) public successfulMessages;
+    mapping(bytes32 => MessageStatus) internal _messages;
+
+    function successfulMessages(bytes32 _messageHash)
+        public
+        view
+        returns (bool)
+    {
+        return _messages[_messageHash] == MessageStatus.Succeeded;
+    }
 
     /**
      * @notice Address of the sender of the currently executing message on the other chain. If the
@@ -272,7 +287,7 @@ abstract contract CrossDomainMessenger is
         if (version == 0) {
             bytes32 oldHash = Hashing.hashCrossDomainMessageV0(_target, _sender, _message, _nonce);
             require(
-                successfulMessages[oldHash] == false,
+                _messages[oldHash] == MessageStatus.Unknown,
                 "CrossDomainMessenger: legacy withdrawal already relayed"
             );
         }
@@ -288,19 +303,24 @@ abstract contract CrossDomainMessenger is
             _message
         );
 
+        // Here we check the replayability conditions. Depending on the caller, the message
+        // should either be UNKNOWN or FAILED.
+        // INFLIGHT or SUCCEEDED messages are not disallowed here.
         if (_isOtherMessenger()) {
             // These properties should always hold when the message is first submitted (as
             // opposed to being replayed).
             assert(msg.value == _value);
-            assert(!failedMessages[versionedHash]);
+            assert(_messages[versionedHash] == MessageStatus.Unknown);
         } else {
             require(
                 msg.value == 0,
                 "CrossDomainMessenger: value must be zero unless message is from a system address"
             );
 
+            // The message is being replayed. Therefore it must have been previously recorded as
+            // failed.
             require(
-                failedMessages[versionedHash],
+                _messages[versionedHash] == MessageStatus.Failed,
                 "CrossDomainMessenger: message cannot be replayed"
             );
         }
@@ -310,14 +330,10 @@ abstract contract CrossDomainMessenger is
             "CrossDomainMessenger: cannot send message to blocked system address"
         );
 
-        require(
-            successfulMessages[versionedHash] == false,
-            "CrossDomainMessenger: message has already been relayed"
-        );
         // Assume the message will succeed. If not, we'll reset this afterwards.
         // By making this assumption we prevent attempts to execute the same message twice
         // in a reentrant call.
-        successfulMessages[versionedHash] = true;
+        _messages[versionedHash] = MessageStatus.InFlight;
 
         require(
             gasleft() >= _minGasLimit + RELAY_GAS_REQUIRED,
@@ -329,11 +345,11 @@ abstract contract CrossDomainMessenger is
         xDomainMsgSender = Constants.DEFAULT_L2_SENDER;
 
         if (success == true) {
+            _messages[versionedHash] = MessageStatus.Succeeded;
             emit RelayedMessage(versionedHash);
         } else {
-            // Update statuses
-            successfulMessages[versionedHash] = false;
-            failedMessages[versionedHash] = true;
+            // Update statuses to reflect that the message failed.
+            _messages[versionedHash] = MessageStatus.Failed;
             emit FailedRelayedMessage(versionedHash);
 
             // Revert in this case if the transaction was triggered by the estimation address. This
