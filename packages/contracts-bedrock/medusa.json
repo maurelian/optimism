@@ -65,11 +65,11 @@
 	"compilation": {
 		"platform": "crytic-compile",
 		"platformConfig": {
-			"target": ".",
-			"solcVersion": "",
-			"exportDirectory": "",
-			"args": []
-		}
+      "target": ".",
+      "solcVersion": "",
+      "exportDirectory": "forge-artifacts",
+      "args": ["--compile-force-framework", "foundry"]
+    }
 	},
 	"logging": {
 		"level": "info",
