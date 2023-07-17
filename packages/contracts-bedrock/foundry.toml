@@ -15,7 +15,6 @@ remappings = [
 extra_output = ['devdoc', 'userdoc', 'metadata', 'storageLayout']
 bytecode_hash = 'none'
 build_info = true
-build_info_path = 'artifacts/build-info'
 ffi = true
 fuzz_runs = 16
 # PNPM symlinks all node_modules from the monorepo root
