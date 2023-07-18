@@ -68,7 +68,7 @@
       "target": ".",
       "solcVersion": "",
       "exportDirectory": "forge-artifacts",
-      "args": ["--compile-force-framework", "foundry"]
+      "args": ["--foundry-out-directory", "forge-artifacts"]
     }
 	},
 	"logging": {
