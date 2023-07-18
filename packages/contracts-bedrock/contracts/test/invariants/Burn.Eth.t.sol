@@ -46,7 +46,7 @@ contract Burn_EthBurner is StdUtils {
 contract Burn_BurnEth_Invariant is StdInvariant, Test {
     Burn_EthBurner internal actor;
 
-    function setUp() public {
+    constructor() public {
         // Create a Eth burner actor.
 
         actor = new Burn_EthBurner(vm);

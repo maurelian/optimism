@@ -7,7 +7,7 @@
     "callSequenceLength": 100,
     "corpusDirectory": "",
     "coverageEnabled": true,
-    "deploymentOrder": [],
+    "deploymentOrder": ["Burn_BurnEth_Invariant"],
     "constructorArgs": {},
     "deployerAddress": "0x30000",
     "senderAddresses": ["0x10000", "0x20000", "0x30000"],
