@@ -39,7 +39,7 @@
       },
       "propertyTesting": {
         "enabled": true,
-        "testPrefixes": ["fuzz_"]
+        "testPrefixes": ["fuzz_", "invariant_"]
       },
       "optimizationTesting": {
         "enabled": false,
