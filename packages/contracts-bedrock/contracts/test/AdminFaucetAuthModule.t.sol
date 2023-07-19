@@ -146,7 +146,6 @@ contract AdminFaucetAuthModuleTest is Test {
             nonce
         );
 
-        vm.prank(admin);
         assertEq(
             adminFam.verify(
                 Faucet.DripParameters(payable(fundsReceiver), nonce),
@@ -176,7 +175,6 @@ contract AdminFaucetAuthModuleTest is Test {
             nonce
         );
 
-        vm.prank(admin);
         assertEq(
             adminFam.verify(
                 Faucet.DripParameters(payable(fundsReceiver), nonce),
