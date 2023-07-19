@@ -98,7 +98,6 @@ contract AssetReceiverTest is AssetReceiver_Initializer {
 
     // withdrawETH should fail if called by non-owner
     function test_withdrawETH_unauthorized_reverts() external {
-        vm.deal(address(assetReceiver), 1 ether);
         vm.expectRevert("UNAUTHORIZED");
         assetReceiver.withdrawETH(payable(alice));
     }
@@ -126,7 +125,6 @@ contract AssetReceiverTest is AssetReceiver_Initializer {
 
     // withdrawETH with address and amount as arguments called by non-owner
     function test_withdrawETHwithAmount_unauthorized_reverts() external {
-        vm.deal(address(assetReceiver), 1 ether);
         vm.expectRevert("UNAUTHORIZED");
         assetReceiver.withdrawETH(payable(alice), 0.5 ether);
     }
@@ -154,7 +152,6 @@ contract AssetReceiverTest is AssetReceiver_Initializer {
 
     // Same as withdrawERC20 but call from non-owner
     function test_withdrawERC20_unauthorized_reverts() external {
-        deal(address(testERC20), address(assetReceiver), 100_000);
         vm.expectRevert("UNAUTHORIZED");
         assetReceiver.withdrawERC20(testERC20, alice);
     }
@@ -182,7 +179,6 @@ contract AssetReceiverTest is AssetReceiver_Initializer {
 
     // Similar as withdrawERC20 with amount but call from non-owner
     function test_withdrawERC20withAmount_unauthorized_reverts() external {
-        deal(address(testERC20), address(assetReceiver), 100_000);
         vm.expectRevert("UNAUTHORIZED");
         assetReceiver.withdrawERC20(testERC20, alice, 50_000);
     }
