@@ -1,0 +1,297 @@
+2461 candidates in 62 test files
+contracts/test/AddressAliasHelper.t.sol: dry running
+contracts/test/AddressAliasHelper.t.sol: mutilating
+contracts/test/AddressAliasHelper.t.sol:12:45-12:73: `.applyL1ToL2Alias(_address);` nonbuildable
+contracts/test/AddressAliasHelper.t.sol:13:47-13:73: `.undoL1ToL2Alias(aliased);` nonbuildable
+contracts/test/AdminFaucetAuthModule.t.sol: dry running
+contracts/test/AdminFaucetAuthModule.t.sol: mutilating
+contracts/test/AdminFaucetAuthModule.t.sol:108:37-108:53: `.consumeNonce();` nonbuildable
+contracts/test/AdminFaucetAuthModule.t.sol:117:26-117:54: `.encodePacked(fundsReceiver)` nonbuildable
+contracts/test/AdminFaucetAuthModule.t.sol:121:9-121:28: `vm.prank(nonAdmin);` passed
+contracts/test/AdminFaucetAuthModule.t.sol:121:11-121:28: `.prank(nonAdmin);` nonbuildable
+contracts/test/AdminFaucetAuthModule.t.sol:136:37-136:53: `.consumeNonce();` nonbuildable
+contracts/test/AdminFaucetAuthModule.t.sol:145:26-145:54: `.encodePacked(fundsReceiver)` nonbuildable
+contracts/test/AdminFaucetAuthModule.t.sol:149:9-149:25: `vm.prank(admin);` passed
+contracts/test/AdminFaucetAuthModule.t.sol:149:11-149:25: `.prank(admin);` nonbuildable
+contracts/test/AdminFaucetAuthModule.t.sol:165:37-165:53: `.consumeNonce();` nonbuildable
+contracts/test/AdminFaucetAuthModule.t.sol:175:26-175:54: `.encodePacked(fundsReceiver)` nonbuildable
+contracts/test/AdminFaucetAuthModule.t.sol:181:21-185:14: `.verify(
+                Faucet.DripParameters(payable(fundsReceiver), nonce),
+                keccak256(abi.encodePacked(randomAddress)),
+                proof
+            )` nonbuildable
+contracts/test/AdminFaucetAuthModule.t.sol:182:23-182:69: `.DripParameters(payable(fundsReceiver), nonce)` nonbuildable
+contracts/test/AdminFaucetAuthModule.t.sol:183:30-183:58: `.encodePacked(randomAddress)` nonbuildable
+contracts/test/AssetReceiver.t.sol: dry running
+contracts/test/AssetReceiver.t.sol: mutilating
+contracts/test/AssetReceiver.t.sol:58:47-58:55: `.owner()` nonbuildable
+contracts/test/AssetReceiver.t.sol:69:9-69:25: `vm.prank(alice);` failed
+contracts/test/AssetReceiver.t.sol:69:11-69:25: `.prank(alice);` nonbuildable
+contracts/test/AssetReceiver.t.sol:82:9-82:50: `vm.deal(address(assetReceiver), 1 ether);` failed
+contracts/test/AssetReceiver.t.sol:82:11-82:50: `.deal(address(assetReceiver), 1 ether);` nonbuildable
+contracts/test/AssetReceiver.t.sol:91:9-91:25: `vm.prank(alice);` failed
+contracts/test/AssetReceiver.t.sol:91:11-91:25: `.prank(alice);` nonbuildable
+contracts/test/AssetReceiver.t.sol:101:9-101:50: `vm.deal(address(assetReceiver), 1 ether);` passed
+contracts/test/AssetReceiver.t.sol:101:11-101:50: `.deal(address(assetReceiver), 1 ether);` nonbuildable
+contracts/test/AssetReceiver.t.sol:110:9-110:50: `vm.deal(address(assetReceiver), 1 ether);` failed
+contracts/test/AssetReceiver.t.sol:110:11-110:50: `.deal(address(assetReceiver), 1 ether);` nonbuildable
+contracts/test/AssetReceiver.t.sol:119:9-119:25: `vm.prank(alice);` failed
+contracts/test/AssetReceiver.t.sol:119:11-119:25: `.prank(alice);` nonbuildable
+contracts/test/AssetReceiver.t.sol:129:9-129:50: `vm.deal(address(assetReceiver), 1 ether);` passed
+contracts/test/AssetReceiver.t.sol:129:11-129:50: `.deal(address(assetReceiver), 1 ether);` nonbuildable
+contracts/test/AssetReceiver.t.sol:139:9-139:67: `deal(address(testERC20), address(assetReceiver), 100_000);` failed
+contracts/test/AssetReceiver.t.sol:147:9-147:25: `vm.prank(alice);` failed
+contracts/test/AssetReceiver.t.sol:147:11-147:25: `.prank(alice);` nonbuildable
+contracts/test/AssetReceiver.t.sol:152:27-152:61: `.balanceOf(address(assetReceiver))` nonbuildable
+contracts/test/AssetReceiver.t.sol:157:9-157:67: `deal(address(testERC20), address(assetReceiver), 100_000);` passed
+contracts/test/AssetReceiver.t.sol:167:9-167:67: `deal(address(testERC20), address(assetReceiver), 100_000);` failed
+contracts/test/AssetReceiver.t.sol:175:9-175:25: `vm.prank(alice);` failed
+contracts/test/AssetReceiver.t.sol:175:11-175:25: `.prank(alice);` nonbuildable
+contracts/test/AssetReceiver.t.sol:180:27-180:61: `.balanceOf(address(assetReceiver))` nonbuildable
+contracts/test/AssetReceiver.t.sol:185:9-185:67: `deal(address(testERC20), address(assetReceiver), 100_000);` passed
+contracts/test/AssetReceiver.t.sol:196:9-196:25: `vm.prank(alice);` failed
+contracts/test/AssetReceiver.t.sol:196:11-196:25: `.prank(alice);` nonbuildable
+contracts/test/AssetReceiver.t.sol:204:9-204:25: `vm.prank(alice);` failed
+contracts/test/AssetReceiver.t.sol:204:11-204:25: `.prank(alice);` nonbuildable
+contracts/test/AssetReceiver.t.sol:208:28-208:54: `.ownerOf(DEFAULT_TOKEN_ID)` nonbuildable
+contracts/test/AssetReceiver.t.sol:213:9-213:25: `vm.prank(alice);` failed
+contracts/test/AssetReceiver.t.sol:213:11-213:25: `.prank(alice);` nonbuildable
+contracts/test/AttestationStation.t.sol: dry running
+contracts/test/AttestationStation.t.sol: mutilating
+contracts/test/AttestationStation.t.sol:37:9-37:34: `vm.prank(alice_attestor);` failed
+contracts/test/AttestationStation.t.sol:37:11-37:34: `.prank(alice_attestor);` nonbuildable
+contracts/test/AttestationStation.t.sol:66:9-66:34: `vm.prank(alice_attestor);` failed
+contracts/test/AttestationStation.t.sol:66:11-66:34: `.prank(alice_attestor);` nonbuildable
+contracts/test/AttestationStation.t.sol:68:9-68:55: `attestationStation.attest(attestationDataArr);` failed
+contracts/test/AttestationStation.t.sol:68:27-68:55: `.attest(attestationDataArr);` nonbuildable
+contracts/test/AttestationStation.t.sol:82:9-86:12: `attestationData = AttestationStation.AttestationData({
+            about: attestationData.about,
+            key: attestationData.key,
+            val: new_val
+        });` passed
+contracts/test/AttestationStation.t.sol:88:9-88:34: `vm.prank(alice_attestor);` failed
+contracts/test/AttestationStation.t.sol:88:11-88:34: `.prank(alice_attestor);` nonbuildable
+contracts/test/AttestationStation.t.sol:90:9-90:55: `attestationStation.attest(attestationDataArr);` failed
+contracts/test/AttestationStation.t.sol:90:27-90:55: `.attest(attestationDataArr);` nonbuildable
+contracts/test/AttestationStation.t.sol:94:31-98:14: `.attestations(
+                alice_attestor,
+                attestationData.about,
+                attestationData.key
+            )` nonbuildable
+contracts/test/AttestationStation.t.sol:106:9-106:34: `vm.prank(alice_attestor);` failed
+contracts/test/AttestationStation.t.sol:106:11-106:34: `.prank(alice_attestor);` nonbuildable
+contracts/test/AttestationStation.t.sol:110:9-114:12: `attestationData[0] = AttestationStation.AttestationData({
+            about: bob,
+            key: bytes32("test-key:string"),
+            val: bytes("test-value")
+        });` passed
+contracts/test/AttestationStation.t.sol:116:9-120:12: `attestationData[1] = AttestationStation.AttestationData({
+            about: bob,
+            key: bytes32("test-key2"),
+            val: bytes("test-value2")
+        });` passed
+contracts/test/AttestationStation.t.sol:122:9-126:12: `attestationData[2] = AttestationStation.AttestationData({
+            about: sally,
+            key: bytes32("test-key:string"),
+            val: bytes("test-value3")
+        });` passed
+contracts/test/AttestationStation.t.sol:128:9-128:52: `attestationStation.attest(attestationData);` failed
+contracts/test/AttestationStation.t.sol:128:27-128:52: `.attest(attestationData);` nonbuildable
+contracts/test/AttestationStation.t.sol:148:31-152:14: `.attestations(
+                alice_attestor,
+                attestationData[2].about,
+                attestationData[2].key
+            )` nonbuildable
+contracts/test/BenchmarkTest.t.sol: dry running
+contracts/test/BenchmarkTest.t.sol: Warning: dry run failed: code=1
+stdout=```
+Compiling 1 files with 0.8.15
+Solc 0.8.15 finished in 2.48s
+Compiler run \u{1b}[32msuccessful!\u{1b}[0m
+
+Running 1 test for contracts/test/BenchmarkTest.t.sol:GasBenchMark_OptimismPortal
+\u{1b}[31m[FAIL. Reason: EvmError: Revert]\u{1b}[0m setUp() (gas: 0)
+Test result: \u{1b}[31mFAILED\u{1b}[0m. 0 passed; 1 failed; 0 skipped; finished in 34.92ms
+
+Running 1 test for contracts/test/BenchmarkTest.t.sol:SetPrevBaseFee_Test
+\u{1b}[32m[PASS]\u{1b}[0m test_setPrevBaseFee_succeeds() (gas: 11515)
+Test result: \u{1b}[32mok\u{1b}[0m. 1 passed; 0 failed; 0 skipped; finished in 35.04ms
+
+Running 1 test for contracts/test/BenchmarkTest.t.sol:GasBenchMark_L2OutputOracle
+\u{1b}[32m[PASS]\u{1b}[0m test_proposeL2Output_benchmark() (gas: 88513)
+Test result: \u{1b}[32mok\u{1b}[0m. 1 passed; 0 failed; 0 skipped; finished in 1.22ms
+
+Running 1 test for contracts/test/BenchmarkTest.t.sol:GasBenchMark_L1StandardBridge_Finalize
+\u{1b}[32m[PASS]\u{1b}[0m test_finalizeETHWithdrawal_benchmark() (gas: 40409)
+Test result: \u{1b}[32mok\u{1b}[0m. 1 passed; 0 failed; 0 skipped; finished in 6.67ms
+
+Running 2 tests for contracts/test/BenchmarkTest.t.sol:GasBenchMark_L1CrossDomainMessenger
+\u{1b}[32m[PASS]\u{1b}[0m test_sendMessage_benchmark_0() (gas: 352113)
+\u{1b}[32m[PASS]\u{1b}[0m test_sendMessage_benchmark_1() (gas: 2950320)
+Test result: \u{1b}[32mok\u{1b}[0m. 2 passed; 0 failed; 0 skipped; finished in 45.48ms
+
+Running 4 tests for contracts/test/BenchmarkTest.t.sol:GasBenchMark_L1StandardBridge_Deposit
+\u{1b}[32m[PASS]\u{1b}[0m test_depositERC20_benchmark_0() (gas: 537892)
+\u{1b}[32m[PASS]\u{1b}[0m test_depositERC20_benchmark_1() (gas: 4050085)
+\u{1b}[32m[PASS]\u{1b}[0m test_depositETH_benchmark_0() (gas: 439321)
+\u{1b}[32m[PASS]\u{1b}[0m test_depositETH_benchmark_1() (gas: 3485048)
+Test result: \u{1b}[32mok\u{1b}[0m. 4 passed; 0 failed; 0 skipped; finished in 21.11ms
+
+Failing tests:
+Encountered 1 failing test in contracts/test/BenchmarkTest.t.sol:GasBenchMark_OptimismPortal
+\u{1b}[31m[FAIL. Reason: EvmError: Revert]\u{1b}[0m setUp() (gas: 0)
+
+Encountered a total of \u{1b}[31m1\u{1b}[0m failing tests, \u{1b}[32m9\u{1b}[0m tests succeeded
+```
+
+stderr=""
+
+Silence this warning with: --allow dry-run-failed
+contracts/test/Bytes.t.sol: dry running
+contracts/test/Bytes.t.sol: mutilating
+contracts/test/Bytes.t.sol:25:23-25:43: `.slice(input, 0, 10)` nonbuildable
+contracts/test/Bytes.t.sol:43:23-43:42: `.slice(input, 1, 9)` nonbuildable
+contracts/test/Bytes.t.sol:53:23-53:43: `.slice(input, 31, 2)` nonbuildable
+contracts/test/Bytes.t.sol:65:23-65:44: `.slice(input, 31, 34)` nonbuildable
+contracts/test/Bytes.t.sol:76:9-76:43: `vm.assume(_start < _input.length);` failed
+contracts/test/Bytes.t.sol:76:11-76:43: `.assume(_start < _input.length);` nonbuildable
+contracts/test/Bytes.t.sol:79:9-79:54: `vm.assume(_length <= _input.length - _start);` failed
+contracts/test/Bytes.t.sol:79:11-79:54: `.assume(_length <= _input.length - _start);` nonbuildable
+contracts/test/Bytes.t.sol:83:9-85:10: `assembly {
+            initPtr := mload(0x40)
+        }` failed
+contracts/test/Bytes.t.sol:96:9-98:10: `assembly {
+            finalPtr := mload(0x40)
+        }` failed
+contracts/test/Bytes.t.sol:133:9-133:79: `vm.assume(_start < _input.length && _length < type(uint256).max - 31);` passed
+contracts/test/Bytes.t.sol:133:11-133:79: `.assume(_start < _input.length && _length < type(uint256).max - 31);` nonbuildable
+contracts/test/Bytes.t.sol:135:9-135:53: `vm.assume(_start + _length > _input.length);` failed
+contracts/test/Bytes.t.sol:135:11-135:53: `.assume(_start + _length > _input.length);` nonbuildable
+contracts/test/Bytes.t.sol:149:9-149:53: `vm.assume(_length > type(uint256).max - 31);` passed
+contracts/test/Bytes.t.sol:149:11-149:53: `.assume(_length > type(uint256).max - 31);` nonbuildable
+contracts/test/Bytes.t.sol:164:9-164:44: `vm.assume(_length < _input.length);` passed
+contracts/test/Bytes.t.sol:164:11-164:44: `.assume(_length < _input.length);` nonbuildable
+contracts/test/Bytes.t.sol:166:9-166:57: `vm.assume(_start > type(uint256).max - _length);` failed
+contracts/test/Bytes.t.sol:166:11-166:57: `.assume(_start > type(uint256).max - _length);` nonbuildable
+contracts/test/Bytes.t.sol:179:36-179:54: `.toNibbles(input);` nonbuildable
+contracts/test/Bytes.t.sol:194:36-194:54: `.toNibbles(input);` nonbuildable
+contracts/test/Bytes.t.sol:206:36-206:54: `.toNibbles(input);` nonbuildable
+contracts/test/Bytes.t.sol:219:9-221:10: `assembly {
+            initPtr := mload(0x40)
+        }` failed
+contracts/test/Bytes.t.sol:232:9-234:10: `assembly {
+            finalPtr := mload(0x40)
+        }` failed
+contracts/test/Bytes.t.sol:281:9-281:38: `vm.assume(!manualEq(_a, _b));` passed
+contracts/test/Bytes.t.sol:281:11-281:38: `.assume(!manualEq(_a, _b));` nonbuildable
+contracts/test/Bytes.t.sol:282:26-282:40: `.equal(_a, _b)` nonbuildable
+contracts/test/Bytes.t.sol:288:23-288:37: `.equal(_a, _b)` nonbuildable
+contracts/test/CheckBalanceHigh.t.sol: dry running
+contracts/test/CheckBalanceHigh.t.sol: mutilating
+contracts/test/CheckBalanceHigh.t.sol:36:9-36:52: `vm.assume(_threshold != type(uint256).max);` passed
+contracts/test/CheckBalanceHigh.t.sol:36:11-36:52: `.assume(_threshold != type(uint256).max);` nonbuildable
+contracts/test/CheckBalanceHigh.t.sol:37:9-37:42: `vm.deal(_target, _threshold + 1);` failed
+contracts/test/CheckBalanceHigh.t.sol:37:11-37:42: `.deal(_target, _threshold + 1);` nonbuildable
+contracts/test/CheckBalanceHigh.t.sol:39:19-39:40: `.check(abi.encode(p))` nonbuildable
+contracts/test/CheckBalanceHigh.t.sol:39:29-39:39: `.encode(p)` nonbuildable
+contracts/test/CheckBalanceHigh.t.sol:52:9-52:49: `vm.assume(_target.balance < _threshold);` passed
+contracts/test/CheckBalanceHigh.t.sol:52:11-52:49: `.assume(_target.balance < _threshold);` nonbuildable
+contracts/test/CheckBalanceHigh.t.sol:54:19-54:40: `.check(abi.encode(p))` nonbuildable
+contracts/test/CheckBalanceHigh.t.sol:54:29-54:39: `.encode(p)` nonbuildable
+contracts/test/CheckBalanceLow.t.sol: dry running
+contracts/test/CheckBalanceLow.t.sol: mutilating
+contracts/test/CheckBalanceLow.t.sol:35:9-35:49: `vm.assume(_target.balance < _threshold);` passed
+contracts/test/CheckBalanceLow.t.sol:35:11-35:49: `.assume(_target.balance < _threshold);` nonbuildable
+contracts/test/CheckBalanceLow.t.sol:37:19-37:40: `.check(abi.encode(p))` nonbuildable
+contracts/test/CheckBalanceLow.t.sol:37:29-37:39: `.encode(p)` nonbuildable
+contracts/test/CheckBalanceLow.t.sol:51:9-51:52: `vm.assume(_threshold != type(uint256).max);` passed
+contracts/test/CheckBalanceLow.t.sol:51:11-51:52: `.assume(_threshold != type(uint256).max);` nonbuildable
+contracts/test/CheckBalanceLow.t.sol:52:9-52:42: `vm.deal(_target, _threshold + 1);` failed
+contracts/test/CheckBalanceLow.t.sol:52:11-52:42: `.deal(_target, _threshold + 1);` nonbuildable
+contracts/test/CheckBalanceLow.t.sol:54:19-54:40: `.check(abi.encode(p))` nonbuildable
+contracts/test/CheckBalanceLow.t.sol:54:29-54:39: `.encode(p)` nonbuildable
+contracts/test/CheckGelatoLow.t.sol: dry running
+contracts/test/CheckGelatoLow.t.sol: mutilating
+contracts/test/CheckGelatoLow.t.sol:71:9-71:74: `vm.assume(gelato.userTokenBalance(_recipient, eth) < _threshold);` passed
+contracts/test/CheckGelatoLow.t.sol:71:11-71:74: `.assume(gelato.userTokenBalance(_recipient, eth) < _threshold);` nonbuildable
+contracts/test/CheckGelatoLow.t.sol:73:19-73:40: `.check(abi.encode(p))` nonbuildable
+contracts/test/CheckGelatoLow.t.sol:73:29-73:39: `.encode(p)` nonbuildable
+contracts/test/CheckGelatoLow.t.sol:88:9-88:61: `gelato.setTokenBalance(_recipient, eth, _threshold);` failed
+contracts/test/CheckGelatoLow.t.sol:88:15-88:61: `.setTokenBalance(_recipient, eth, _threshold);` nonbuildable
+contracts/test/CheckGelatoLow.t.sol:90:19-90:40: `.check(abi.encode(p))` nonbuildable
+contracts/test/CheckGelatoLow.t.sol:90:29-90:39: `.encode(p)` nonbuildable
+contracts/test/CheckTrue.t.sol: dry running
+contracts/test/CheckTrue.t.sol: mutilating
+contracts/test/CheckTrue.t.sol:28:19-28:32: `.check(input)` nonbuildable
+contracts/test/Clones.t.sol: dry running
+contracts/test/Clones.t.sol: mutilating
+contracts/test/Clones.t.sol:99:37-99:64: `.createAddressClone(param);` nonbuildable
+contracts/test/Clones.t.sol:100:32-100:46: `.addressArg();` nonbuildable
+contracts/test/Clones.t.sol:107:37-107:61: `.createUintClone(param);` nonbuildable
+contracts/test/Clones.t.sol:108:32-108:43: `.uintArg();` nonbuildable
+contracts/test/Clones.t.sol:115:37-115:67: `.createFixedBytesClone(param);` nonbuildable
+contracts/test/Clones.t.sol:116:32-116:49: `.fixedBytesArg();` nonbuildable
+contracts/test/Clones.t.sol:125:37-125:66: `.createUintArrayClone(param);` nonbuildable
+contracts/test/Clones.t.sol:126:41-126:77: `.uintArrayArg(uint64(param.length));` nonbuildable
+contracts/test/Clones.t.sol:133:37-133:65: `.createDynBytesClone(param);` nonbuildable
+contracts/test/Clones.t.sol:134:37-134:72: `.dynBytesArg(uint64(param.length));` nonbuildable
+contracts/test/Clones.t.sol:141:37-141:63: `.createUint64Clone(param);` nonbuildable
+contracts/test/Clones.t.sol:142:31-142:44: `.uint64Arg();` nonbuildable
+contracts/test/Clones.t.sol:149:37-149:62: `.createUint8Clone(param);` nonbuildable
+contracts/test/Clones.t.sol:150:30-150:42: `.uint8Arg();` nonbuildable
+contracts/test/CrossDomainMessenger.t.sol: dry running
+contracts/test/CrossDomainMessenger.t.sol: mutilating
+contracts/test/CrossDomainMessenger.t.sol:34:9-34:53: `vm.assume(_data.length <= type(uint64).max);` passed
+contracts/test/CrossDomainMessenger.t.sol:34:11-34:53: `.assume(_data.length <= type(uint64).max);` nonbuildable
+contracts/test/CrossDomainMessenger.t.sol:35:37-35:67: `.baseGas(_data, _minGasLimit);` nonbuildable
+contracts/test/CrossDomainMessenger.t.sol:36:32-36:71: `.minimumGasLimit(uint64(_data.length));` nonbuildable
+contracts/test/CrossDomainMessenger.t.sol:132:9-132:68: `vm.assume(_sender != Predeploys.L2_CROSS_DOMAIN_MESSENGER);` passed
+contracts/test/CrossDomainMessenger.t.sol:132:11-132:68: `.assume(_sender != Predeploys.L2_CROSS_DOMAIN_MESSENGER);` nonbuildable
+contracts/test/CrossDomainMessenger.t.sol:135:9-135:37: `er.setFuzzedSender(_sender);` passed
+contracts/test/CrossDomainMessenger.t.sol:135:11-135:37: `.setFuzzedSender(_sender);` nonbuildable
+contracts/test/CrossDomainMessenger.t.sol:137:38-137:53: `.getCallData();` nonbuildable
+contracts/test/CrossDomainMessenger.t.sol:153:9-153:86: `vm.store(address(op), bytes32(senderSlotIndex), bytes32(abi.encode(sender)));` failed
+contracts/test/CrossDomainMessenger.t.sol:153:11-153:86: `.store(address(op), bytes32(senderSlotIndex), bytes32(abi.encode(sender)));` nonbuildable
+contracts/test/CrossDomainMessenger.t.sol:153:68-153:83: `.encode(sender)` nonbuildable
+contracts/test/CrossDomainMessenger.t.sol:154:9-154:31: `vm.prank(address(op));` failed
+contracts/test/CrossDomainMessenger.t.sol:154:11-154:31: `.prank(address(op));` nonbuildable
+contracts/test/CrossDomainOwnable.t.sol: dry running
+contracts/test/CrossDomainOwnable.t.sol: mutilating
+contracts/test/CrossDomainOwnable.t.sol:43:9-43:71: `vm.prank(AddressAliasHelper.applyL1ToL2Alias(setter.owner()));` failed
+contracts/test/CrossDomainOwnable.t.sol:43:11-43:71: `.prank(AddressAliasHelper.applyL1ToL2Alias(setter.owner()));` nonbuildable
+contracts/test/CrossDomainOwnable.t.sol:43:36-43:69: `.applyL1ToL2Alias(setter.owner())` nonbuildable
+contracts/test/CrossDomainOwnable.t.sol:43:60-43:68: `.owner()` nonbuildable
+contracts/test/CrossDomainOwnable.t.sol:45:24-45:32: `.value()` nonbuildable
+contracts/test/CrossDomainOwnable.t.sol:63:9-63:25: `vm.recordLogs();` failed
+contracts/test/CrossDomainOwnable.t.sol:63:11-63:25: `.recordLogs();` nonbuildable
+contracts/test/CrossDomainOwnable.t.sol:65:9-65:25: `vm.prank(alice);` failed
+contracts/test/CrossDomainOwnable.t.sol:65:11-65:25: `.prank(alice);` nonbuildable
+contracts/test/CrossDomainOwnable.t.sol:76:38-76:57: `.getRecordedLogs();` nonbuildable
+contracts/test/CrossDomainOwnable.t.sol:88:41-88:65: `.fromLast20Bytes(_from);` nonbuildable
+contracts/test/CrossDomainOwnable.t.sol:96:9-96:24: `vm.prank(from);` failed
+contracts/test/CrossDomainOwnable.t.sol:96:11-96:24: `.prank(from);` nonbuildable
+contracts/test/CrossDomainOwnable.t.sol:98:24-98:32: `.value()` nonbuildable
+contracts/test/CrossDomainOwnable2.t.sol: dry running
+contracts/test/CrossDomainOwnable2.t.sol: mutilating
+contracts/test/CrossDomainOwnable2.t.sol:46:42-46:75: `.fillLast12Bytes(address(alice));` nonbuildable
+contracts/test/CrossDomainOwnable2.t.sol:47:9-47:52: `vm.store(address(L2Messenger), key, value);` failed
+contracts/test/CrossDomainOwnable2.t.sol:47:11-47:52: `.store(address(L2Messenger), key, value);` nonbuildable
+contracts/test/CrossDomainOwnable2.t.sol:49:9-49:40: `vm.prank(address(L2Messenger));` failed
+contracts/test/CrossDomainOwnable2.t.sol:49:11-49:40: `.prank(address(L2Messenger));` nonbuildable
+contracts/test/CrossDomainOwnable2.t.sol:61:35-61:87: `.encodeWithSelector(XDomainSetter2.set.selector, 1);` nonbuildable
+contracts/test/CrossDomainOwnable2.t.sol:63:31-70:11: `.hashCrossDomainMessage(
+            Encoding.encodeVersionedNonce(nonce, 1),
+            sender,
+            target,
+            value,
+            minGasLimit,
+            message
+        );` nonbuildable
+contracts/test/CrossDomainOwnable2.t.sol:64:21-64:52: `.encodeVersionedNonce(nonce, 1)` nonbuildable
+contracts/test/CrossDomainOwnable2.t.sol:77:9-77:77: `vm.prank(AddressAliasHelper.applyL1ToL2Alias(address(L1Messenger)));` failed
+contracts/test/CrossDomainOwnable2.t.sol:77:11-77:77: `.prank(AddressAliasHelper.applyL1ToL2Alias(address(L1Messenger)));` nonbuildable
+contracts/test/CrossDomainOwnable2.t.sol:77:36-77:75: `.applyL1ToL2Alias(address(L1Messenger))` nonbuildable
+contracts/test/CrossDomainOwnable2.t.sol:87:24-87:32: `.value()` nonbuildable
+contracts/test/CrossDomainOwnable2.t.sol:92:31-92:40: `.owner();` nonbuildable
+contracts/test/CrossDomainOwnable2.t.sol:96:9-96:77: `vm.prank(AddressAliasHelper.applyL1ToL2Alias(address(L1Messenger)));` failed
+contracts/test/CrossDomainOwnable2.t.sol:96:11-96:77: `.prank(AddressAliasHelper.applyL1ToL2Alias(address(L1Messenger)));` nonbuildable
