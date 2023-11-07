@@ -631,7 +631,6 @@ contract Deploy is Deployer {
         address systemConfig = mustGetAddress("SystemConfig");
 
         bytes32 batcherHash = bytes32(uint256(uint160(cfg.batchSenderAddress())));
-        uint256 startBlock = cfg.systemConfigStartBlock();
 
         _upgradeAndCallViaSafe({
             _proxy: payable(systemConfigProxy),
@@ -645,17 +644,7 @@ contract Deploy is Deployer {
                     batcherHash,
                     uint64(cfg.l2GenesisBlockGasLimit()),
                     cfg.p2pSequencerAddress(),
-                    Constants.DEFAULT_RESOURCE_CONFIG(),
-                    startBlock,
-                    cfg.batchInboxAddress(),
-                    SystemConfig.Addresses({
-                        l1CrossDomainMessenger: mustGetAddress("L1CrossDomainMessengerProxy"),
-                        l1ERC721Bridge: mustGetAddress("L1ERC721BridgeProxy"),
-                        l1StandardBridge: mustGetAddress("L1StandardBridgeProxy"),
-                        l2OutputOracle: mustGetAddress("L2OutputOracleProxy"),
-                        optimismPortal: mustGetAddress("OptimismPortalProxy"),
-                        optimismMintableERC20Factory: mustGetAddress("OptimismMintableERC20FactoryProxy")
-                    })
+                    Constants.DEFAULT_RESOURCE_CONFIG()
                 )
                 )
         });
@@ -678,19 +667,6 @@ contract Deploy is Deployer {
         require(resourceConfig.systemTxMaxGas == rconfig.systemTxMaxGas);
         require(resourceConfig.minimumBaseFee == rconfig.minimumBaseFee);
         require(resourceConfig.maximumBaseFee == rconfig.maximumBaseFee);
-
-        require(config.l1ERC721Bridge() == mustGetAddress("L1ERC721BridgeProxy"));
-        require(config.l1StandardBridge() == mustGetAddress("L1StandardBridgeProxy"));
-        require(config.l2OutputOracle() == mustGetAddress("L2OutputOracleProxy"));
-        require(config.optimismPortal() == mustGetAddress("OptimismPortalProxy"));
-        require(config.l1CrossDomainMessenger() == mustGetAddress("L1CrossDomainMessengerProxy"));
-
-        // A non zero start block is an override
-        if (startBlock != 0) {
-            require(config.startBlock() == startBlock);
-        } else {
-            require(config.startBlock() == block.number);
-        }
     }
 
     /// @notice Initialize the L1StandardBridge
@@ -709,12 +685,9 @@ contract Deploy is Deployer {
         }
         require(uint256(proxyAdmin.proxyType(l1StandardBridgeProxy)) == uint256(ProxyAdmin.ProxyType.CHUGSPLASH));
 
-        _upgradeAndCallViaSafe({
-            _proxy: payable(l1StandardBridgeProxy),
-            _implementation: l1StandardBridge,
-            _innerCallData: abi.encodeCall(
-                L1StandardBridge.initialize, (L1CrossDomainMessenger(l1CrossDomainMessengerProxy))
-                )
+        _callViaSafe({
+            _target: address(proxyAdmin),
+            _data: abi.encodeCall(ProxyAdmin.upgrade, (payable(l1StandardBridgeProxy), l1StandardBridge))
         });
 
         string memory version = L1StandardBridge(payable(l1StandardBridgeProxy)).version();
@@ -724,19 +697,18 @@ contract Deploy is Deployer {
         require(address(bridge.MESSENGER()) == l1CrossDomainMessengerProxy);
         require(address(bridge.messenger()) == l1CrossDomainMessengerProxy);
         require(address(bridge.OTHER_BRIDGE()) == Predeploys.L2_STANDARD_BRIDGE);
-        require(address(bridge.otherBridge()) == Predeploys.L2_STANDARD_BRIDGE);
     }
 
     /// @notice Initialize the L1ERC721Bridge
     function initializeL1ERC721Bridge() public broadcast {
+        ProxyAdmin proxyAdmin = ProxyAdmin(mustGetAddress("ProxyAdmin"));
         address l1ERC721BridgeProxy = mustGetAddress("L1ERC721BridgeProxy");
         address l1ERC721Bridge = mustGetAddress("L1ERC721Bridge");
         address l1CrossDomainMessengerProxy = mustGetAddress("L1CrossDomainMessengerProxy");
 
-        _upgradeAndCallViaSafe({
-            _proxy: payable(l1ERC721BridgeProxy),
-            _implementation: l1ERC721Bridge,
-            _innerCallData: abi.encodeCall(L1ERC721Bridge.initialize, (L1CrossDomainMessenger(l1CrossDomainMessengerProxy)))
+        _callViaSafe({
+            _target: address(proxyAdmin),
+            _data: abi.encodeCall(ProxyAdmin.upgrade, (payable(l1ERC721BridgeProxy), l1ERC721Bridge))
         });
 
         L1ERC721Bridge bridge = L1ERC721Bridge(l1ERC721BridgeProxy);
@@ -799,9 +771,7 @@ contract Deploy is Deployer {
         _upgradeAndCallViaSafe({
             _proxy: payable(l1CrossDomainMessengerProxy),
             _implementation: l1CrossDomainMessenger,
-            _innerCallData: abi.encodeCall(
-                L1CrossDomainMessenger.initialize, (OptimismPortal(payable(optimismPortalProxy)))
-                )
+            _innerCallData: abi.encodeCall(L1CrossDomainMessenger.initialize, ())
         });
 
         L1CrossDomainMessenger messenger = L1CrossDomainMessenger(l1CrossDomainMessengerProxy);
@@ -809,7 +779,6 @@ contract Deploy is Deployer {
         console.log("L1CrossDomainMessenger version: %s", version);
 
         require(address(messenger.PORTAL()) == optimismPortalProxy);
-        require(address(messenger.portal()) == optimismPortalProxy);
         bytes32 xdmSenderSlot = vm.load(address(messenger), bytes32(uint256(204)));
         require(address(uint160(uint256(xdmSenderSlot))) == Constants.DEFAULT_L2_SENDER);
     }
@@ -823,13 +792,7 @@ contract Deploy is Deployer {
             _proxy: payable(l2OutputOracleProxy),
             _implementation: l2OutputOracle,
             _innerCallData: abi.encodeCall(
-                L2OutputOracle.initialize,
-                (
-                    cfg.l2OutputOracleStartingBlockNumber(),
-                    cfg.l2OutputOracleStartingTimestamp(),
-                    cfg.l2OutputOracleProposer(),
-                    cfg.l2OutputOracleChallenger()
-                )
+                L2OutputOracle.initialize, (cfg.l2OutputOracleStartingBlockNumber(), cfg.l2OutputOracleStartingTimestamp())
                 )
         });
 
@@ -838,15 +801,10 @@ contract Deploy is Deployer {
         console.log("L2OutputOracle version: %s", version);
 
         require(oracle.SUBMISSION_INTERVAL() == cfg.l2OutputOracleSubmissionInterval());
-        require(oracle.submissionInterval() == cfg.l2OutputOracleSubmissionInterval());
         require(oracle.L2_BLOCK_TIME() == cfg.l2BlockTime());
-        require(oracle.l2BlockTime() == cfg.l2BlockTime());
         require(oracle.PROPOSER() == cfg.l2OutputOracleProposer());
-        require(oracle.proposer() == cfg.l2OutputOracleProposer());
         require(oracle.CHALLENGER() == cfg.l2OutputOracleChallenger());
-        require(oracle.challenger() == cfg.l2OutputOracleChallenger());
         require(oracle.FINALIZATION_PERIOD_SECONDS() == cfg.finalizationPeriodSeconds());
-        require(oracle.finalizationPeriodSeconds() == cfg.finalizationPeriodSeconds());
         require(oracle.startingBlockNumber() == cfg.l2OutputOracleStartingBlockNumber());
         require(oracle.startingTimestamp() == cfg.l2OutputOracleStartingTimestamp());
     }
@@ -866,10 +824,7 @@ contract Deploy is Deployer {
         _upgradeAndCallViaSafe({
             _proxy: payable(optimismPortalProxy),
             _implementation: optimismPortal,
-            _innerCallData: abi.encodeCall(
-                OptimismPortal.initialize,
-                (L2OutputOracle(l2OutputOracleProxy), guardian, SystemConfig(systemConfigProxy), false)
-                )
+            _innerCallData: abi.encodeCall(OptimismPortal.initialize, (false))
         });
 
         OptimismPortal portal = OptimismPortal(payable(optimismPortalProxy));
