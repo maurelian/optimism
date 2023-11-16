@@ -280,3 +280,6 @@
 | gameImpls        | mapping(GameType => contract IDisputeGame) | 101  | 0      | 32    | src/dispute/DisputeGameFactory.sol:DisputeGameFactory |
 | _disputeGames    | mapping(Hash => GameId)                    | 102  | 0      | 32    | src/dispute/DisputeGameFactory.sol:DisputeGameFactory |
 | _disputeGameList | GameId[]                                   | 103  | 0      | 32    | src/dispute/DisputeGameFactory.sol:DisputeGameFactory |
+
+
+Additional comment to make sure this file shows up in github files diff
